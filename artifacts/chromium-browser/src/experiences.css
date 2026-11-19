@@ -1,0 +1,351 @@
+/* Slate Experiences — a quiet, tactile layer for personal rituals and local tools. */
+.slate-home-grid .slate-clock-time { font-family: var(--heading-font, Fraunces), serif; }
+.slate-feature-toggle {
+  display: inline-flex;
+  min-height: 31px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  font-size: 12px;
+}
+.slate-feature-toggle:hover, .slate-feature-toggle[aria-expanded="true"] { border-color: var(--accent); background: var(--accent-wash); }
+.slate-feature-toggle svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+
+#experience-settings { min-height: 0; padding-top: 12px; }
+.experience-tabs { display: flex; gap: 4px; margin: 0 0 12px; padding: 4px; border: 1px solid var(--line); border-radius: 9px; background: var(--canvas); }
+.experience-tabs button { flex: 1; min-height: 34px; padding: 5px; border: 0; border-radius: 6px; color: var(--muted); background: transparent; font-size: 11px; }
+.experience-tabs button[aria-pressed="true"] { color: var(--ink); background: var(--surface); box-shadow: 0 1px 4px rgba(20,30,20,.08); }
+.experience-section { display: grid; gap: 12px; }
+.experience-section > h3, .experience-subhead { margin: 7px 0 0; color: var(--quiet); font: 10px "IBM Plex Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+.experience-copy { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.experience-callout { padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: var(--canvas); font-size: 11px; line-height: 1.55; }
+.experience-callout strong { color: var(--ink); }
+.experience-field { display: grid; gap: 6px; color: var(--muted); font-size: 11px; }
+.experience-field input, .experience-field select, .experience-field textarea {
+  width: 100%; min-height: 36px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; outline: 0; color: var(--ink); background: var(--canvas);
+}
+.experience-field textarea { min-height: 76px; resize: vertical; }
+.experience-field input:focus, .experience-field select:focus, .experience-field textarea:focus { border-color: var(--accent); }
+.experience-inline { display: flex; align-items: center; gap: 8px; }
+.experience-inline > * { min-width: 0; }
+.experience-check { display: flex; align-items: flex-start; gap: 8px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.experience-check input { margin: 2px 0 0; accent-color: var(--accent); }
+.experience-button, .experience-quiet-button {
+  min-height: 35px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 7px; color: var(--accent); background: var(--accent-wash); font-size: 11px;
+}
+.experience-button:hover, .experience-quiet-button:hover { border-color: var(--accent); }
+.experience-quiet-button { color: var(--muted); background: transparent; }
+.experience-button.danger { color: var(--warning); }
+.experience-button:disabled, .experience-quiet-button:disabled { opacity: .45; }
+.experience-list { display: grid; gap: 7px; }
+.experience-row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--canvas); }
+.experience-row-copy { min-width: 0; display: grid; gap: 4px; }
+.experience-row-copy strong, .experience-row-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.experience-row-copy strong { font-size: 12px; font-weight: 600; }
+.experience-row-copy small { color: var(--quiet); font: 10px "IBM Plex Mono", monospace; }
+.experience-row-actions { display: flex; gap: 4px; }
+.experience-empty { padding: 17px 12px; border: 1px dashed var(--line); border-radius: 9px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.experience-permission { padding: 12px; border: 1px solid color-mix(in srgb, var(--warning) 34%, var(--line)); border-radius: 10px; background: color-mix(in srgb, var(--warning) 7%, var(--surface)); }
+.experience-permission strong { display: block; margin-bottom: 4px; font-size: 12px; }
+.experience-permission p { margin: 5px 0 10px; color: var(--muted); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.experience-permission-actions { display: flex; flex-wrap: wrap; gap: 5px; }
+.experience-pending-banner { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin: 12px 0; padding: 10px; border: 1px solid color-mix(in srgb, var(--warning) 34%, var(--line)); border-radius: 9px; background: color-mix(in srgb, var(--warning) 7%, var(--surface)); }
+.experience-pending-banner p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.experience-results { display: grid; gap: 5px; }
+.experience-result { display: grid; gap: 4px; width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--canvas); text-align: left; }
+.experience-result:hover { border-color: var(--accent); }
+.experience-result small { color: var(--quiet); font: 10px "IBM Plex Mono", monospace; overflow-wrap: anywhere; }
+.experience-error { margin: 0; color: var(--warning); font-size: 11px; line-height: 1.5; }
+.experience-inline-edit { display: grid; grid-column: 1 / -1; gap: 8px; width: 100%; padding: 10px 0 2px; }
+.experience-image-preview { width: 100%; max-height: 110px; margin-top: 5px; border-radius: 7px; object-fit: cover; }
+.experience-note-copy { white-space: normal; }
+.experience-section[tabindex="0"]:focus-visible, .slate-widget[data-widget="collections"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.slate-feature-parking { display: none !important; }
+.slate-collection-chip.is-drop-target { outline: 2px dashed var(--accent); outline-offset: 2px; }
+.experience-homebar { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+.experience-homebar button { min-height: 31px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: var(--surface); font-size: 11px; }
+.experience-homebar button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+.home-content.slate-home-grid { display: flex; flex-direction: column; align-items: stretch; width: min(760px, calc(100% - 48px)); min-height: 100%; padding: 24px 0; }
+.slate-home-header { display: grid; justify-items: center; margin: 12px 0 20px; }
+.slate-home-header, .slate-home-editing .slate-home-header { display: none !important; }
+.slate-home-header .home-symbol { margin-bottom: 13px; }
+.slate-home-header .eyebrow { margin-bottom: 7px; }
+.slate-home-header h1 { font-size: clamp(26px, 5cqw, 40px); }
+.slate-home-header .home-subtitle { margin: 7px 0 0; }
+.slate-widget-zone { display: grid; width: 100%; gap: 12px; }
+.slate-widget { position: relative; min-width: 0; padding: 15px; border: 1px solid var(--line); border-radius: var(--widget-radius, 13px); background: color-mix(in srgb, var(--surface) var(--widget-opacity, 90%), transparent); box-shadow: 0 8px 24px rgba(40,45,36,.035); transition: transform .18s ease, opacity .18s ease; }
+.slate-widget[data-size="compact"] { padding: 10px 12px; }
+.slate-widget[data-size="large"] { padding: 21px; }
+.slate-widget.is-dragging { opacity: .48; transform: scale(.985); }
+.slate-widget.is-drop-target { outline: 2px dashed var(--accent); outline-offset: 2px; }
+.slate-widget-edit-tools { position: absolute; z-index: 1; top: 7px; right: 7px; display: none; gap: 3px; }
+.slate-home-editing .slate-widget-edit-tools { display: flex; }
+.slate-widget-edit-tools button { width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); background: var(--surface); }
+.slate-home-editing .slate-widget { padding-top: 38px; }
+.slate-widget[data-widget="search"] { padding: 0; border: 0; box-shadow: none; background: transparent; }
+.slate-widget[data-widget="search"] .home-search { margin: 0; }
+.slate-widget[data-widget="bookmarks"] .home-bookmarks { margin: 0; }
+.slate-widget-title { margin: 0 0 10px; color: var(--quiet); font: 10px "IBM Plex Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+.slate-clock { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.slate-clock-time { color: var(--ink); font: 400 clamp(26px, 5vw, 38px)/1 Fraunces, Georgia, serif; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.slate-clock-date { color: var(--muted); font-size: 12px; text-align: right; }
+.slate-collection-strip { display: flex; gap: 7px; overflow-x: auto; padding: 1px 1px 4px; scrollbar-width: thin; }
+.slate-collection-chip { flex: 0 0 auto; max-width: 190px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: var(--canvas); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slate-collection-chip:hover { border-color: var(--accent); background: var(--accent-wash); }
+.slate-companion { display: flex; align-items: center; gap: 13px; }
+.slate-pet-button { display: grid; flex: 0 0 auto; place-items: center; width: 64px; height: 64px; padding: 5px; border: 1px solid var(--line); border-radius: 50%; background: var(--canvas); }
+.slate-pet-button svg { width: 48px; height: 48px; overflow: visible; }
+.slate-pet-button.is-bopping svg { animation: slate-pet-bop .48s ease-in-out; }
+.slate-companion-copy { min-width: 0; }
+.slate-companion-copy strong { font: 400 19px Fraunces, Georgia, serif; }
+.slate-companion-copy p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+.slate-game-launchers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.slate-game-launch { min-height: 78px; display: grid; align-content: center; gap: 6px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--canvas); text-align: left; }
+.slate-game-launch:hover { border-color: var(--accent); transform: translateY(-1px); }
+.slate-game-launch strong { font-size: 12px; }
+.slate-game-launch small { color: var(--muted); font-size: 10px; }
+.slate-games-home { display: grid; gap: 11px; }
+.slate-game-stage { display: grid; gap: 9px; }
+.slate-game-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.slate-game-top strong { font: 400 17px Fraunces, Georgia, serif; }
+.slate-memory-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 7px; }
+.slate-memory-card { min-height: 55px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--canvas); font: 18px "IBM Plex Mono", monospace; }
+.slate-memory-card.revealed, .slate-memory-card.matched { border-color: var(--accent); background: var(--accent-wash); }
+.slate-memory-card.matched { opacity: .7; }
+.slate-draw-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.slate-draw-tools input[type="color"] { width: 36px; height: 30px; padding: 2px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.slate-draw-tools input[type="range"] { width: 85px; accent-color: var(--accent); }
+.slate-draw-canvas { display: block; width: 100%; height: 210px; touch-action: none; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: crosshair; }
+.slate-home-footer { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: auto; padding-top: 18px; color: var(--quiet); font-size: 10px; line-height: 1.5; }
+.slate-home-editing .slate-home-header { display: none; }
+.slate-feature-open { outline: 2px solid var(--accent); outline-offset: 3px; }
+.brand-lockup {
+  -webkit-app-region: no-drag;
+  padding: 5px 7px;
+  border: 0;
+  border-radius: 7px;
+  color: inherit;
+  background: transparent;
+}
+.brand-lockup:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.brand-lockup:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.brand-secret-tap .brand-mark { animation: brand-secret-wink .42s cubic-bezier(.2,.8,.3,1.25); }
+.secret-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+.slate-widget-edit-tools { display: none !important; }
+.slate-home-editing .slate-widget-edit-tools { display: flex !important; }
+.slate-widget-edit-tools .slate-widget-drag-handle {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--accent);
+  background: var(--surface);
+  font-size: 16px;
+  cursor: grab;
+  touch-action: none;
+}
+.slate-home-editing .slate-widget { cursor: default; }
+.slate-home-editing .slate-widget-drag-handle { cursor: grab; }
+.slate-home-editing .slate-widget-drag-handle:active { cursor: grabbing; }
+.slate-home-edit-toggle[aria-pressed="true"] { color: var(--accent) !important; border-color: var(--accent) !important; background: var(--accent-wash) !important; }
+.slate-companion-mount { min-width: 0; width: 100%; }
+/* Miso stays unboxed even when the other home widgets use filled surfaces. */
+:root .slate-home-grid .slate-widget[data-widget="companion"],
+:root .slate-home-grid[data-widget-background="true"] .slate-widget[data-widget="companion"] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.slate-companion-app:not(.floating-mode) .companion-card { min-height: 134px; }
+@keyframes brand-secret-wink {
+  0% { transform: scale(1) rotate(0); }
+  42% { transform: scale(1.12) rotate(-5deg); }
+  75% { transform: scale(.96) rotate(4deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-secret-tap .brand-mark { animation: none; }
+}
+@keyframes slate-pet-bop { 0%,100% { transform: translateY(0) rotate(0); } 38% { transform: translateY(-7px) rotate(-5deg); } 72% { transform: translateY(1px) rotate(4deg); } }
+@media (max-width: 767px) {
+  .slate-feature-toggle span { display: none; }
+  .slate-feature-toggle { width: 32px; justify-content: center; padding: 0; }
+  .home-content.slate-home-grid { width: calc(100% - 28px); padding: 16px 0; }
+  .slate-widget-zone { gap: 9px; }
+  .slate-widget { padding: 12px; }
+  .slate-memory-card { min-height: 48px; }
+  .slate-home-footer { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) { .slate-pet-button.is-bopping svg { animation: none; } }
+
+/* The home is a movable canvas, not a card grid. */
+.home-content.slate-home-grid {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: max(100%, 690px);
+  height: max(100%, 690px);
+  margin: 0;
+  padding: 0;
+  container-type: inline-size;
+}
+.slate-home-header {
+  position: absolute;
+  top: clamp(22px, 5vh, 52px);
+  left: clamp(12px, 5cqw, 64px);
+  z-index: 2;
+  justify-items: start;
+  width: min(310px, calc(100% - 36px));
+  margin: 0;
+  pointer-events: none;
+}
+.slate-home-header .home-symbol { display: none; }
+.slate-home-header .eyebrow { margin: 0 0 9px; text-align: left; }
+.slate-home-header h1 { font-size: clamp(24px, 3.4vw, 39px); text-align: left; }
+.slate-home-header .home-subtitle { margin: 8px 0 0; text-align: left; }
+.slate-widget-zone { position: absolute; z-index: 3; inset: 0; display: block; width: auto; pointer-events: none; }
+.slate-widget {
+  position: absolute;
+  z-index: 1;
+  width: max-content;
+  max-width: min(430px, calc(100% - 24px));
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--widget-radius, 13px);
+  background: transparent;
+  box-shadow: none;
+  pointer-events: auto;
+  touch-action: pan-y;
+}
+.slate-widget[data-widget="search"] { width: min(520px, calc(100% - 24px)); }
+.slate-widget[data-widget="bookmarks"] { width: min(330px, calc(100% - 24px)); }
+.slate-widget[data-widget="collections"] { width: min(385px, calc(100% - 24px)); }
+.slate-widget[data-widget="games"] { width: min(340px, calc(100% - 24px)); }
+.slate-widget[data-widget="companion"] { width: min(285px, calc(100% - 24px)); }
+.slate-widget[data-widget="clock"] { width: max-content; }
+.slate-widget-body { min-width: 0; }
+.slate-widget[data-widget="search"] .slate-widget-body,
+.slate-widget[data-widget="bookmarks"] .slate-widget-body { width: 100%; }
+.slate-widget:not([data-widget="search"]) .slate-widget-body { padding: 8px; }
+.slate-home-grid[data-widget-background="true"] .slate-widget:not([data-widget="search"]) {
+  padding: 10px;
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--surface) var(--widget-opacity, 90%), transparent);
+  box-shadow: 0 8px 28px rgba(40,45,36,.07);
+  backdrop-filter: blur(16px);
+}
+.slate-home-grid[data-widget-background="true"] .slate-widget[data-widget="search"] .home-search {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(16px);
+}
+.slate-widget.is-dragging { z-index: 10; opacity: .88; transition: none; will-change: transform; }
+.slate-widget.is-drop-target { outline: 2px dashed var(--accent); outline-offset: 3px; }
+.slate-widget:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.slate-widget-zone { --zone-width: calc((100% - 72px) / 3); }
+.slate-widget-zone .slate-widget { width: var(--zone-width); max-width: var(--zone-width); transition: none; }
+.slate-widget-zone .slate-widget[data-widget="clock"] { width: max-content; }
+.slate-home-editing .slate-widget { padding: 0; }
+.slate-home-editing .slate-widget .slate-widget-edit-tools {
+  position: relative; inset: auto; z-index: 2; display: flex !important;
+  align-items: center; gap: 5px; padding: 5px; border-radius: 8px;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+}
+.slate-widget-edit-tools select { min-width: 0; flex: 1; height: 28px; font-size: 11px; background: var(--surface); color: var(--ink); border: 0; }
+.slate-widget-edit-tools button { flex: 0 0 28px; touch-action: none; }
+.slate-widget-available { position: relative; pointer-events: auto; }
+.slate-widget-available summary { cursor: pointer; padding: 7px; font-size: 11px; }
+.slate-widget-available-list {
+  position: absolute; z-index: 20; top: 100%; left: 0; min-width: 180px;
+  display: grid; gap: 4px; padding: 8px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--surface); color: var(--ink);
+}
+.slate-widget-available:not([open]) .slate-widget-available-list { display: none; }
+@container (max-width: 759px) {
+  .slate-widget-zone { --zone-width: calc(100% - 36px); }
+}
+.slate-widget-edit-tools { display: none !important; }
+.slate-widget[data-widget="clock"] .slate-widget-title { display: none; }
+.slate-widget[data-widget="clock"] .slate-clock { display: grid; gap: 4px; justify-items: end; }
+.slate-widget[data-widget="clock"] .slate-clock-time { font-size: clamp(34px, 5vw, 54px); }
+.slate-widget[data-widget="clock"] .slate-clock-date { text-align: right; }
+.slate-home-grid:not([data-widget-background="true"]) .slate-widget[data-widget="search"] .home-search {
+  border-color: color-mix(in srgb, var(--ink) 22%, transparent);
+  background: transparent;
+  box-shadow: none;
+}
+.slate-home-grid:not([data-widget-background="true"]) .slate-widget[data-widget="bookmarks"] .bookmark-tile {
+  background: transparent;
+}
+/* Home surfaces share the canvas palette, including optional card backgrounds,
+   so arbitrary panel colors cannot make text on the home screen unreadable. */
+.slate-home-grid[data-widget-background="true"] .slate-widget:not([data-widget="search"]),
+.slate-home-grid[data-widget-background="true"] .slate-widget[data-widget="search"] .home-search {
+  background: color-mix(in srgb, var(--canvas) var(--widget-opacity, 90%), transparent);
+}
+.slate-home-grid .bookmark-tile { background: var(--canvas); }
+.experience-homebar {
+  position: absolute;
+  z-index: 5;
+  top: clamp(190px, 28vh, 250px);
+  left: clamp(12px, 5cqw, 64px);
+  display: flex;
+  flex-wrap: wrap;
+  max-width: calc(100% - 36px);
+  gap: 7px;
+  margin: 0;
+  pointer-events: auto;
+}
+.experience-homebar button {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  font-size: 10px;
+  white-space: normal;
+  backdrop-filter: blur(12px);
+}
+.experience-homebar button:hover { color: var(--ink); border-color: var(--accent); }
+.slate-home-footer { display: none; }
+.slate-home-editing .slate-home-header { display: grid; }
+.slate-home-editing .slate-widget { cursor: grab; }
+.slate-widget:active { cursor: grabbing; }
+.custom-window-colors { display: grid; gap: 7px; }
+.custom-window-colors input:disabled { opacity: .45; cursor: not-allowed; }
+:root[data-contrast="alto"] .slate-home-grid[data-widget-background="true"] .slate-widget {
+  color: var(--ink);
+  border: 2px solid var(--line);
+  background: var(--surface);
+  backdrop-filter: none;
+}
+@media (max-width: 767px) {
+  .home-content.slate-home-grid { width: 100%; min-height: max(100%, 760px); height: max(100%, 760px); }
+  .slate-home-header { top: 22px; left: 12px; width: min(260px, calc(100% - 24px)); }
+  .slate-home-header h1 { font-size: 26px; }
+  .slate-widget[data-widget="search"] { width: calc(100% - 32px); }
+  .slate-widget[data-widget="bookmarks"], .slate-widget[data-widget="collections"],
+  .slate-widget[data-widget="games"], .slate-widget[data-widget="companion"] { width: calc(100% - 32px); }
+  .slate-widget[data-widget="clock"] { max-width: calc(100% - 32px); }
+  .slate-widget[data-widget="clock"] .slate-clock-time { font-size: 34px; }
+  .experience-homebar { top: 178px; left: 12px; max-width: calc(100% - 24px); }
+}

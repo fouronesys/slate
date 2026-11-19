@@ -1,0 +1,56 @@
+.settings-toggle { color: var(--accent); border: 1px solid var(--line); background: var(--surface); }
+.settings-toggle:hover, .settings-toggle[aria-expanded="true"] { color: var(--ink); background: var(--accent-wash); }
+.settings-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+/* These controls remain in the DOM for compatibility with legacy modules. */
+#customize-toggle, #bookmarks-toggle, #history-toggle,
+#experiences-toggle { display: none !important; }
+.settings-nav { display: grid; gap: 11px; flex: 0 0 auto; padding: 14px 0 12px; border-bottom: 1px solid var(--line); }
+.settings-nav-group { display: grid; gap: 3px; }
+.settings-nav-label, .settings-subhead { margin: 0 0 3px; color: var(--quiet); font: 600 10px var(--ui-font, system-ui), sans-serif; letter-spacing: .11em; text-transform: uppercase; }
+.settings-nav-items { display: flex; flex-wrap: wrap; gap: 4px; }
+.settings-nav button { min-height: 29px; padding: 5px 8px; border: 1px solid transparent; border-radius: 7px; color: var(--muted); background: transparent; font-size: 11px; }
+.settings-nav button:hover, .settings-nav button[aria-current="page"] { color: var(--ink); border-color: var(--line); background: var(--accent-wash); }
+.settings-section { min-width: 0; padding: 13px 0 8px; }
+.settings-field { display: grid; gap: 7px; margin: 16px 0; color: var(--muted); font-size: 12px; }
+.settings-field select { min-height: 36px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: var(--surface); }
+.settings-check { display: flex; align-items: flex-start; gap: 9px; margin: 14px 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.settings-check input, .legal-consents input { flex: 0 0 auto; margin: 2px 0 0; accent-color: var(--accent); }
+.settings-help { margin: 8px 0 15px; color: var(--quiet); font-size: 11px; line-height: 1.6; }
+.browser-commands { display: grid; gap: 5px; }
+.browser-command { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 43px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--canvas); text-align: left; }
+.browser-command:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-wash); }
+.browser-command kbd { flex: 0 0 auto; padding: 3px 6px; border: 1px solid var(--line); border-radius: 5px; color: var(--quiet); background: var(--surface); font: 10px "IBM Plex Mono", monospace; }
+.settings-empty { padding: 13px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.legal-draft-notice { margin: 0 0 12px; padding: 10px 11px; border: 1px solid color-mix(in srgb, var(--warning) 35%, var(--line)); border-radius: 8px; color: var(--warning); background: color-mix(in srgb, var(--warning) 7%, var(--surface)); font-size: 11px; line-height: 1.55; }
+.legal-links, .legal-gate-documents { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
+.legal-links button, .legal-gate-documents button { padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; color: var(--accent); background: var(--surface); font-size: 11px; }
+.legal-document, .legal-gate-reading { max-height: 34vh; overflow: auto; padding: 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); background: var(--canvas); font-size: 11px; line-height: 1.65; user-select: text; }
+.legal-document h3, .legal-gate-reading h3 { margin: 0 0 6px; color: var(--ink); font-size: 13px; }
+.legal-document h4, .legal-gate-reading h4 { margin: 14px 0 4px; color: var(--ink); font-size: 11px; }
+.legal-document p, .legal-gate-reading p { margin: 0 0 10px; white-space: pre-wrap; }
+.legal-gate { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 18px; background: color-mix(in srgb, var(--chrome) 54%, transparent); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+.legal-gate-card { width: min(620px, 100%); max-height: min(92dvh, 880px); overflow: auto; padding: clamp(20px, 4vw, 34px); border: 1px solid var(--line); border-radius: 16px; color: var(--ink); background: var(--surface); box-shadow: 0 24px 90px rgba(30,35,27,.22); user-select: text; }
+.legal-gate-card h1 { margin: 0 0 9px; font: 400 31px var(--ui-font, system-ui), sans-serif; letter-spacing: -.035em; }
+.legal-gate-intro, .legal-gate-footnote { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.legal-gate-documents { margin: 14px 0; }
+.legal-gate-reading { max-height: 27vh; margin: 12px 0; }
+.legal-consents { display: grid; gap: 12px; margin: 18px 0 14px; padding: 14px; border: 1px solid var(--line); border-radius: 9px; }
+.legal-consents legend { padding: 0 5px; }
+.legal-consents label { display: flex; align-items: flex-start; gap: 9px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.legal-gate-error { color: var(--warning); font-size: 12px; line-height: 1.5; }
+.legal-gate-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.legal-gate-actions button { min-height: 37px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--accent-wash); font-size: 12px; }
+.legal-gate-actions button:disabled { opacity: .45; }
+.legal-gate-actions .legal-secondary { color: var(--muted); background: transparent; }
+.legal-gate-footnote { margin-bottom: 0; font-size: 10px; }
+#side-panel:has(.settings-nav:not([hidden])) { gap: 0; }
+#side-panel > .panel-items { min-height: 0; }
+#experience-settings { min-height: 0; }
+.experience-tabs { display: none !important; }
+@media (max-width: 560px) {
+  .settings-nav { gap: 8px; }
+  .settings-nav-items { gap: 3px; }
+  .settings-nav button { padding-inline: 6px; font-size: 10px; }
+  .legal-gate { padding: 8px; }
+  .legal-gate-card { max-height: 96dvh; padding: 18px; }
+}

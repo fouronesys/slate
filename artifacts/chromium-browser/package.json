@@ -1,0 +1,122 @@
+{
+  "name": "@workspace/chromium-browser",
+  "version": "0.1.1",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "description": "Slate Privacy, un navegador personalizable de escritorio basado en Chromium.",
+  "main": "src/main.cjs",
+  "scripts": {
+    "dev": "electron .",
+    "dev:preview": "bash ./scripts/preview.sh",
+    "package:mac": "node scripts/package-mac.cjs",
+    "package:mac:check": "node scripts/package-mac.cjs --check",
+    "release:mac": "node scripts/release-mac.cjs",
+    "test:updates": "bash ./scripts/preview.sh scripts/verify-app-updates.cjs",
+    "video:setup": "node scripts/vmp.cjs setup",
+    "video:account": "node scripts/vmp.cjs account",
+    "video:verify": "node scripts/vmp.cjs verify",
+    "check:video": "node --check src/protected-video.cjs && node --check scripts/vmp-client.cjs && node --check scripts/vmp.cjs && node --check scripts/vmp-after-pack.cjs && node --check scripts/vmp-after-sign.cjs",
+    "guide:build": "node scripts/build-install-guide.cjs",
+    "package:mac:assisted": "node scripts/package-mac-assisted.cjs",
+    "package:mac:assisted:check": "node scripts/package-mac-assisted.cjs --check",
+    "test:installer": "node --test test/installer*.test.cjs",
+    "test:address": "bash ./scripts/preview.sh scripts/verify-address-suggestions.cjs",
+    "test:tabs": "bash ./scripts/preview.sh scripts/verify-tabs.cjs",
+    "test:installer:ui": "bash ./scripts/preview.sh scripts/verify-installer-ui.cjs",
+    "test:installer:shell": "bash ./scripts/preview.sh scripts/verify-installer-shell.cjs",
+    "check:installer": "node --check installer/engine.cjs && node --check installer/native.cjs && node --check installer/main.cjs && node --check installer/preload.cjs && node --check installer/ui.js && node --check scripts/build-install-guide.cjs && node --check scripts/package-mac-assisted.cjs",
+    "typecheck": "node --check src/main.cjs && node --check src/preload.cjs && node --check src/renderer.cjs && node --check src/privacy-policy.cjs && node --check src/protection.cjs && node --check src/native-privacy.cjs && node --check src/appearance.cjs && node --check src/customization.cjs && node --check scripts/verify-native-privacy.cjs && node --check scripts/verify-privacy.cjs && node --check src/media-controls.cjs && node --check scripts/probe-youtube.cjs && node --check scripts/youtube-worker.cjs && node --check scripts/youtube-probe-results.cjs && node --check scripts/youtube-navigation.cjs && node --check scripts/verify-preflight.cjs && node --check scripts/verify-media.cjs && node --check src/features.cjs && node --check src/permissions.cjs && node --check src/experiences.cjs && node --check scripts/verify-features.cjs",
+    "test": "node --test test/*.test.cjs",
+    "check:settings": "node --check src/browser-preferences.cjs && node --check src/browser-commands.cjs && node --check src/legal-documents.cjs && node --check src/legal-state.cjs && node --check src/settings-ui.cjs && node --check src/video-buttons.cjs && node --check scripts/verify-settings.cjs",
+    "test:settings": "bash ./scripts/preview.sh scripts/verify-settings.cjs",
+    "test:privacy": "bash ./scripts/preview.sh scripts/verify-privacy.cjs",
+    "test:personalization": "bash ./scripts/preview.sh scripts/verify-personalization.cjs",
+    "test:native-privacy": "bash ./scripts/preview.sh scripts/verify-native-privacy.cjs",
+    "test:youtube": "node scripts/probe-youtube.cjs",
+    "test:preflight": "bash ./scripts/preview.sh scripts/verify-preflight.cjs",
+    "test:media": "bash ./scripts/preview.sh scripts/verify-media.cjs"
+  },
+  "devDependencies": {
+    "electron": "github:castlabs/electron-releases#v43.8.6+wvcus",
+    "electron-builder": "^26.0.12",
+    "js-yaml": "4.3.2"
+  },
+  "build": {
+    "afterPack": "./scripts/vmp-after-pack.cjs",
+    "afterSign": "./scripts/vmp-after-sign.cjs",
+    "electronVersion": "43.8.6+wvcus",
+    "electronDownload": {
+      "mirror": "https://github.com/castlabs/electron-releases/releases/download/",
+      "customDir": "v{{ version }}"
+    },
+    "appId": "com.brujula.browser",
+    "productName": "Slate Privacy",
+    "artifactName": "Slate-Privacy-${version}-${arch}.${ext}",
+    "publish": {
+      "provider": "github",
+      "owner": "fouronesys",
+      "repo": "slate",
+      "releaseType": "draft"
+    },
+    "icon": "src/assets/icon.png",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "dmg": {
+      "sign": true,
+      "title": "Slate Privacy",
+      "artifactName": "Slate-Privacy-${version}-${arch}.${ext}",
+      "background": "installer/background.png",
+      "format": "UDZO",
+      "filesystem": "HFS+",
+      "iconSize": 96,
+      "iconTextSize": 14,
+      "window": {
+        "width": 720,
+        "height": 480
+      },
+      "contents": [
+        {
+          "x": 198,
+          "y": 270,
+          "type": "file"
+        },
+        {
+          "x": 522,
+          "y": 270,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "mac": {
+      "sign": "./scripts/apple-sign.cjs",
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "minimumSystemVersion": "12.0",
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "@ghostery/adblocker-electron": "^2.20.3",
+    "darkreader": "^4.9.135",
+    "electron-updater": "6.8.11",
+    "tldts": "^7.5.1"
+  }
+}

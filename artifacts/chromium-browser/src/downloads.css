@@ -1,0 +1,19 @@
+.downloads-toggle { position: relative; flex: 0 0 32px; }
+#downloads-count { position: absolute; top: -2px; right: -4px; min-width: 14px; padding: 1px 3px; border-radius: 8px; background: var(--accent); color: var(--ink); font-size: 9px; }
+.downloads-center { display: grid; gap: 12px; }
+.download-copy { display: block; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.download-folder { margin: 0; overflow-wrap: anywhere; font-size: 11px; color: var(--ink); }
+.download-row { display: grid; gap: 9px; padding: 13px 0; border-top: 1px solid var(--line); }
+.download-name { overflow-wrap: anywhere; font-size: 12px; }
+.download-row progress { width: 100%; height: 5px; accent-color: var(--accent); }
+.download-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.download-action { padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); cursor: pointer; font-size: 11px; }
+.download-action:hover { border-color: var(--accent); }
+.miso-download-courier { position: fixed; z-index: 9999; width: 44px; height: 38px; pointer-events: none; will-change: transform, opacity; }
+.miso-download-courier * { pointer-events: none; }
+.miso-download-courier .companion-figure { width: 34px; height: 38px; overflow: visible; }
+.miso-download-courier .cat-paw-left { animation: miso-courier-step .14s linear infinite alternate; transform-origin: center; transform-box: fill-box; }
+.miso-download-courier .cat-paw-right { animation: miso-courier-step .14s linear infinite alternate-reverse; transform-origin: center; transform-box: fill-box; }
+.miso-download-file { position: absolute; left: 26px; top: 16px; width: 14px; height: 17px; display: grid; place-items: center; border: 1px solid #807c92; border-radius: 2px 5px 2px 2px; background: #fffaf0; color: #353047; font: bold 12px sans-serif; transform: rotate(12deg); }
+@keyframes miso-courier-step { from { transform: rotate(-17deg); } to { transform: rotate(17deg); } }
+@media (prefers-reduced-motion: reduce) { .miso-download-courier { display: none; } }

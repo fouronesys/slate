@@ -1,0 +1,9 @@
+{
+  "name": "slate-workspace",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.26.1",
+  "scripts": {
+    "test": "pnpm --filter @workspace/chromium-browser test"
+  }
+}

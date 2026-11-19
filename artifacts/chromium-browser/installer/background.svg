@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="960" viewBox="0 0 720 480">
+  <defs>
+    <style>
+      @font-face {
+        font-family: "Slate DM Sans";
+        src: url("../src/assets/fonts/dm-sans.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "Slate Fraunces";
+        src: url("../src/assets/fonts/fraunces.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "Slate IBM Plex Mono";
+        src: url("../src/assets/fonts/ibm-plex-mono.ttf") format("truetype");
+      }
+      .sans { font-family: "Slate DM Sans", sans-serif; }
+      .serif { font-family: "Slate Fraunces", Georgia, serif; }
+      .mono { font-family: "Slate IBM Plex Mono", monospace; }
+    </style>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#faf9f4"/>
+      <stop offset="1" stop-color="#f2f1e9"/>
+    </linearGradient>
+    <linearGradient id="sage" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7f9077"/>
+      <stop offset="1" stop-color="#65785f"/>
+    </linearGradient>
+    <pattern id="grain" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="5" r=".38" fill="#606858" opacity=".16"/>
+      <circle cx="19" cy="14" r=".32" fill="#606858" opacity=".12"/>
+      <circle cx="11" cy="24" r=".3" fill="#606858" opacity=".14"/>
+    </pattern>
+    <path id="markTop" d="m462.5 168.2c0-78.21-49.98-139.5-142-139.5-14.08-.192-59.2-.192-74.5-.064h-48.32c-72.32 0-116.8 39.81-116.8 72.83 0 44.99 75.14 77.57 166.2 113.5 84.93 32.83 171.1 67.58 199.5 136.4 2.688 5.44 9.28 4.928 10.88-.768 3.584-12.22 4.8-26.37 4.864-37.89-.256-40.9.192-103 .128-144.6z"/>
+    <path id="markBottom" d="m49.54 208.8-.256 129.7c-.512 80.7 48.51 145.7 142.2 145.2 17.41.064 64.06.064 81.98 0 16.19-.064 37.57.192 55.17 0 64-.448 103.1-35.9 103.1-69.31 0-47.87-64.38-88.77-151.1-126-98.18-41.47-171.5-65.73-213.3-118.7-2.56-3.136-7.744-2.752-9.92.704-5.888 9.28-7.744 23.1-7.872 38.34z"/>
+  </defs>
+
+  <!-- A warm, quiet field with a barely-there paper grain. -->
+  <rect width="720" height="480" fill="url(#paper)"/>
+  <rect width="720" height="480" fill="url(#grain)" opacity=".18"/>
+  <path d="M0 0h720v480H0z" fill="none" stroke="#fff" stroke-opacity=".62" stroke-width="1"/>
+
+  <!-- A soft, asymmetrical sage wash holds the visual center without entering the icon wells. -->
+  <ellipse cx="360" cy="270" rx="86" ry="61" fill="#dce2d5" opacity=".42"/>
+  <ellipse cx="360" cy="270" rx="62" ry="44" fill="#eef0e8" opacity=".82"/>
+
+  <!-- Brand lockup, drawn from the shipped Slate S mark. -->
+  <g transform="translate(286 42) scale(.047)" fill="#373a35">
+    <use xlink:href="#markTop"/>
+    <use xlink:href="#markBottom"/>
+  </g>
+  <text x="374" y="63" class="sans" fill="#373a35" font-size="15" font-weight="600" letter-spacing="-.35" text-anchor="middle">Slate Privacy</text>
+  <text x="360" y="91" class="mono" fill="#7c8377" font-size="7.1" letter-spacing="1.45" text-anchor="middle">INSTALACIÓN PARA MAC</text>
+
+  <!-- Brief, plain-language direction; icon wells below stay untouched. -->
+  <text x="360" y="139" class="serif" fill="#373a35" font-size="23" text-anchor="middle" letter-spacing="-.35">Un espacio más sereno para navegar.</text>
+  <text x="360" y="165" class="sans" fill="#596057" font-size="10.4" text-anchor="middle">Arrastra Slate Privacy a Aplicaciones</text>
+
+  <path d="M315 192h90" stroke="#b8c1b0" stroke-width=".7"/>
+  <circle cx="360" cy="192" r="2" fill="#7b8b72"/>
+
+  <!-- A restrained forward gesture, centered between the native Finder icons. -->
+  <g fill="none" stroke="url(#sage)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M331 270h52" stroke-width="1.6"/>
+    <path d="m375 262 8 8-8 8" stroke-width="1.6"/>
+  </g>
+  <circle cx="322" cy="270" r="1.5" fill="#9ba894"/>
+  <circle cx="398" cy="270" r="1.5" fill="#9ba894"/>
+
+  <!-- Quiet lower rule, outside the reserved icon and filename region. -->
+  <path d="M288 389h144" stroke="#d8dbd1" stroke-width=".7"/>
+  <text x="360" y="409" class="mono" fill="#858b7f" font-size="6.5" letter-spacing="1.15" text-anchor="middle">SLATE PRIVACY</text>
+</svg>

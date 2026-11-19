@@ -1,0 +1,19 @@
+.tabs-list { flex: 1 1 auto; overflow-x: hidden; scrollbar-width: none; }
+.tabs-list::-webkit-scrollbar { display: none; }
+:root:not([data-tab-style="vertical"]) .tabs-list { overflow-y: hidden; }
+:root:not([data-tab-style="vertical"]) .tab {
+  width: 225px; min-width: 0; max-width: 225px; flex: 1 1 225px;
+}
+.tab[hidden] { display: none !important; }
+:root:not([data-tab-style="vertical"]) .tabs-tight .tab { gap: 6px; padding-left: 8px; padding-right: 5px; }
+:root:not([data-tab-style="vertical"]) .tabs-tight .tab:not(.active) .tab-close { display: none; }
+.all-tabs {
+  order: 2; flex: 0 0 auto; align-self: center; width: auto; min-width: 45px;
+  height: 32px; gap: 4px; padding: 0 7px; margin-bottom: 3px;
+}
+.all-tabs[hidden] { display: none; }
+.all-tabs svg { width: 13px; height: 13px; }
+#all-tabs-count { font-size: 11px; font-variant-numeric: tabular-nums; }
+:root[data-tab-style="vertical"] .tabs-list { scrollbar-width: thin; }
+:root[data-tab-style="vertical"] .tabs-list::-webkit-scrollbar { display: block; width: 5px; }
+:root[data-tab-style="vertical"] .all-tabs { align-self: stretch; margin-top: 5px; flex-shrink: 0; }

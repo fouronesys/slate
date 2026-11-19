@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; media-src 'self' file:; connect-src 'none';"
+    />
+    <title>Slate Privacy</title>
+    <link rel="stylesheet" href="./slate.css" />
+    <link rel="stylesheet" href="./fonts.css" />
+    <link rel="stylesheet" href="./experiences.css" />
+    <link rel="stylesheet" href="./downloads.css" />
+    <link rel="stylesheet" href="./companion.css" />
+    <link rel="stylesheet" href="./settings.css" />
+    <link rel="stylesheet" href="./address.css" />
+    <link rel="stylesheet" href="./tabs.css" />
+    <script src="./theme-tokens.cjs"></script>
+    <script src="./font-options.cjs"></script>
+    <script src="./companion-theme.cjs"></script>
+    <script src="./home-layout.cjs"></script>
+  </head>
+  <body>
+    <button id="titlebar-sensor" class="titlebar-sensor" type="button" aria-label="Mostrar barra del logo y nombre" title="Mostrar barra superior" hidden></button>
+    <header class="titlebar">
+      <button class="brand-lockup" id="brand-secret" type="button" aria-label="Marca de Slate Privacy; una pequeña sorpresa te espera">
+        <img class="brand-mark" src="./assets/slate.svg" alt="" />
+        <span class="brand-name">slate <span>privacy</span></span>
+      </button>
+      <span class="window-title">Espacio personal</span>
+      <span class="secret-announcement" id="secret-announcement" role="status" aria-live="polite"></span>
+      <div class="drag-space"></div>
+      <button class="icon-button restore-button" id="restore-button" title="Reabrir pestaña cerrada" aria-label="Reabrir pestaña cerrada">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7V3m0 4h4M5.3 7a6.3 6.3 0 1 1-1 5.8"/></svg>
+      </button>
+    </header>
+
+    <div class="tabs-row">
+      <div class="tabs-list" id="tabs-list" role="tablist" aria-label="Pestañas"></div>
+      <button class="new-tab icon-button" id="new-tab" title="Nueva pestaña (⌘T)" aria-label="Nueva pestaña">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>
+      </button>
+      <button class="all-tabs icon-button" id="all-tabs" type="button" hidden
+        aria-label="Todas las pestañas" aria-haspopup="menu" aria-expanded="false">
+        <span id="all-tabs-count"></span>
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 8 5 5 5-5"/></svg>
+      </button>
+    </div>
+
+    <nav class="toolbar" aria-label="Controles del navegador">
+      <div class="nav-controls">
+        <button class="icon-button" id="back" title="Atrás" aria-label="Atrás">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.5-5.5 5.5 5.5 5.5M7.4 10h8"/></svg>
+        </button>
+        <button class="icon-button" id="forward" title="Adelante" aria-label="Adelante">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 4.5 5.5 5.5-5.5 5.5m5.1-5.5h-8"/></svg>
+        </button>
+        <button class="icon-button" id="reload" title="Recargar" aria-label="Recargar">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.3 8A5.6 5.6 0 0 0 5.5 5.6L4 7m0-3v3h3m-2.3 5A5.6 5.6 0 0 0 14.5 14.4L16 13m0 3v-3h-3"/></svg>
+        </button>
+        <button class="icon-button home-button" id="home" title="Inicio" aria-label="Inicio">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 9 7-6 7 6v7a1 1 0 0 1-1 1h-4v-5H8v5H4a1 1 0 0 1-1-1z"/></svg>
+        </button>
+      </div>
+      <form class="address-form" id="address-form">
+        <span class="secure-indicator" id="secure-indicator" aria-hidden="true">
+          <svg viewBox="0 0 18 18"><rect x="3.5" y="7.5" width="11" height="8" rx="2"/><path d="M6 7.5V5a3 3 0 0 1 6 0v2.5"/></svg>
+        </span>
+        <input id="address" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="both" aria-expanded="false" aria-controls="address-suggestions" aria-label="Buscar o introducir dirección" placeholder="Buscar o introducir dirección" />
+        <button class="bookmark-button" id="bookmark" type="button" title="Guardar marcador" aria-label="Guardar marcador">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 3.5h9v13l-4.5-3-4.5 3z"/></svg>
+        </button>
+        <div id="address-suggestions" class="address-suggestions" role="listbox" aria-label="Direcciones de tu historial y marcadores" hidden></div>
+      </form>
+      <button class="shield-button" id="privacy-toggle" type="button" title="Protección de privacidad" aria-label="Mostrar protección de privacidad" aria-controls="side-panel" aria-expanded="false">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m10 2 6.5 2.8v4.5c0 4.2-3.5 6.9-6.5 8.7-3-1.8-6.5-4.5-6.5-8.7V4.8z"/><path d="m7 9.7 2 2 4-4"/></svg>
+        <span id="shield-count">…</span>
+      </button>
+      <button class="icon-button panel-button" id="bookmarks-toggle" title="Marcadores" aria-label="Mostrar marcadores">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 3.5h9v13l-4.5-3-4.5 3z"/></svg>
+      </button>
+      <button class="icon-button history-button" id="history-toggle" title="Historial" aria-label="Mostrar historial">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 9a6.5 6.5 0 1 1 1.8 4.5M3.5 4.5V9h4m2.5-5v6l3 2"/></svg>
+      </button>
+      <button class="customize-button" id="customize-toggle" title="Personalizar Slate" aria-label="Personalizar Slate" aria-expanded="false">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/><circle cx="7" cy="5" r="2"/><circle cx="13" cy="10" r="2"/><circle cx="8" cy="15" r="2"/></svg>
+        <span>Personalizar</span>
+      </button>
+      <button class="icon-button downloads-toggle" id="downloads-toggle" type="button" title="Descargas" aria-label="Mostrar descargas" aria-controls="side-panel" aria-expanded="false">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v10m-4-4 4 4 4-4M3 12v5h14v-5"/></svg>
+        <span id="downloads-count" hidden></span>
+      </button>
+      <button class="icon-button settings-toggle" id="settings-toggle" type="button" title="Abrir ajustes y biblioteca" aria-label="Abrir ajustes y biblioteca" aria-expanded="false">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/></svg>
+      </button>
+    </nav>
+    <nav class="bookmarks-bar" id="bookmarks-bar" aria-label="Barra de marcadores" hidden></nav>
+
+    <video id="home-background-video" class="home-background-video" muted autoplay loop playsinline aria-hidden="true" hidden></video>
+    <div id="home-background-scrim" class="home-background-scrim" aria-hidden="true" hidden></div>
+    <main class="home-screen" id="home-screen">
+      <div class="home-content">
+        <div class="home-symbol" aria-hidden="true"><span></span><img src="./assets/slate.svg" alt="" /></div>
+        <p class="eyebrow">TU ESPACIO, A TU RITMO</p>
+        <form class="home-search" id="home-search">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+          <input id="home-query" type="text" autocomplete="off" aria-label="Buscar en la web" placeholder="Buscar en la web" />
+          <kbd>↵</kbd>
+        </form>
+        <section class="home-bookmarks" aria-label="Accesos rápidos">
+          <div class="home-section-label"><span>TUS ACCESOS RÁPIDOS</span><button id="home-library" type="button">Ver biblioteca ↗</button></div>
+          <div id="home-bookmarks"></div>
+        </section>
+        <div class="home-footer">
+          <span><i class="status-dot"></i><span id="home-protection-status">Preparando protección…</span></span>
+          <span>Tu navegador. A tu manera.</span>
+        </div>
+      </div>
+    </main>
+
+    <aside class="side-panel" id="side-panel" hidden>
+      <div class="panel-heading">
+        <div>
+          <p class="panel-kicker" id="panel-kicker">TU BIBLIOTECA</p>
+          <h2 id="panel-title">Marcadores</h2>
+        </div>
+        <button class="icon-button" id="panel-close" aria-label="Cerrar panel" title="Cerrar">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg>
+        </button>
+      </div>
+      <nav class="settings-nav" id="settings-nav" aria-label="Ajustes y biblioteca"></nav>
+      <section id="general-settings" class="general-settings settings-section" hidden aria-label="General">
+        <p class="panel-intro">Ajustes de navegación guardados localmente en este dispositivo.</p>
+        <label class="settings-field" for="default-zoom">Zoom predeterminado
+          <select id="default-zoom" name="defaultZoom">
+            <option value="75">75%</option><option value="90">90%</option><option value="100">100%</option>
+            <option value="110">110%</option><option value="125">125%</option><option value="150">150%</option>
+            <option value="175">175%</option><option value="200">200%</option>
+          </select>
+        </label>
+        <label class="settings-check"><input id="background-tabs" type="checkbox" /><span>Abrir enlaces en pestañas nuevas en segundo plano</span></label>
+        <p class="settings-help">Solo controla si los enlaces que abren pestañas nuevas las activan de inmediato. No cambia la suspensión de pestañas.</p>
+        <label class="settings-field" for="search-engine">Buscador predeterminado
+          <select id="search-engine" name="searchEngine">
+            <option value="google">Google</option><option value="duckduckgo">DuckDuckGo</option>
+            <option value="bing">Bing</option><option value="brave">Brave Search</option>
+          </select>
+        </label>
+        <p class="settings-help">Las consultas de búsqueda se envían al proveedor elegido.</p>
+        <label class="settings-check"><input id="online-suggestions" type="checkbox" aria-describedby="online-suggestions-help" /><span>Sugerencias de búsqueda en línea</span></label>
+        <p class="settings-help" id="online-suggestions-help">Desactivadas por defecto. Si las activas, el texto parcial se envía al buscador seleccionado antes de pulsar Enter, junto con tu IP. No se usan en pestañas fugaces, ni comparten cookies de tus páginas. Evitamos direcciones completas y patrones evidentes de credenciales, pero no podemos detectar todos los datos privados. Los sitios conocidos, el historial y los marcadores se sugieren localmente.</p>
+        <h3 class="settings-subhead">Actualizaciones de Slate · <span id="slate-version"></span></h3>
+        <label class="settings-check"><input id="automatic-updates" type="checkbox" aria-describedby="app-updates-help" /><span>Buscar actualizaciones automáticamente</span></label>
+        <p class="settings-help" id="app-updates-help">Opcional. Consulta GitHub al iniciar y cada seis horas, sin enviar tu historial ni cookies de las páginas. GitHub y sus servidores de descarga reciben tu IP y datos técnicos. Tú eliges cuándo descargar y reiniciar. Solo se instalan actualizaciones firmadas; no se ejecuta código descargado desde el repositorio sin empaquetar.</p>
+        <p class="settings-help" id="update-status" role="status" aria-live="polite"></p>
+        <progress id="update-progress" max="100" value="0" aria-label="Descarga de la actualización" hidden></progress>
+        <div class="segmented">
+          <button type="button" id="check-app-update">Buscar actualizaciones</button>
+          <button type="button" id="download-app-update" hidden>Descargar versión</button>
+          <button type="button" id="install-app-update" hidden>Reiniciar e instalar</button>
+        </div>
+      </section>
+      <section id="video-settings" class="settings-section" hidden aria-label="Vídeos">
+        <h3 class="settings-subhead">Vídeos</h3>
+        <label class="settings-check"><input id="pip-button-enabled" type="checkbox" /><span>Mostrar botón de imagen en imagen</span></label>
+        <p class="settings-help">El botón aparece en los controles de vídeo compatibles. La ventana de imagen en imagen conserva su presentación nativa, sin controles de Slate.</p>
+      </section>
+      <section id="commands-settings" class="settings-section" hidden aria-label="Comandos del navegador">
+        <p class="panel-intro">Acciones disponibles en esta versión de Slate.</p>
+        <div id="browser-commands" class="browser-commands"></div>
+      </section>
+      <section id="legal-settings" class="settings-section legal-settings" hidden aria-label="Documentos legales">
+        <p class="legal-draft-notice"></p>
+        <div class="legal-links">
+          <button type="button" data-legal-document="terms">Términos de uso</button>
+          <button type="button" data-legal-document="privacy">Aviso de privacidad</button>
+        </div>
+        <div class="legal-document" id="legal-document" tabindex="0" aria-live="polite"></div>
+      </section>
+      <div class="panel-items" id="panel-items"></div>
+      <section id="appearance-settings" class="appearance-settings" hidden aria-label="Personalizar apariencia">
+        <p class="panel-intro">Haz que Slate se sienta tuyo. Los cambios se aplican al instante y se guardan solo en este dispositivo.</p>
+        <fieldset><legend>APARIENCIA</legend><div class="segmented">
+          <button type="button" data-preference="theme" data-value="claro" aria-pressed="true">Claro</button>
+          <button type="button" data-preference="theme" data-value="oscuro" aria-pressed="false">Oscuro</button>
+          <button type="button" data-preference="theme" data-value="sistema" aria-pressed="false">Sistema</button>
+        </div></fieldset>
+        <fieldset><legend>TEMA DE LAS PÁGINAS</legend>
+          <div class="segmented">
+            <button type="button" data-preference="pageTheme" data-value="seguir" aria-pressed="true">Seguir a Slate</button>
+            <button type="button" data-preference="pageTheme" data-value="original" aria-pressed="false">Original</button>
+          </div>
+          <p class="field-help">Adapta fondos y texto al tema claro u oscuro, sin invertir toda la página. Conserva imágenes y vídeos; algunos sitios pueden necesitar una excepción.</p>
+          <p id="page-theme-status" class="field-help" role="status"></p>
+          <button type="button" id="page-theme-site" class="quiet-button" disabled>Abre una página web</button>
+          <button type="button" id="page-theme-clear-exceptions" class="quiet-button" hidden>Restablecer excepciones</button>
+        </fieldset>
+        <fieldset><legend>COLOR DE ACENTO</legend><div class="accent-options">
+          <button type="button" data-preference="accent" data-value="salvia" aria-pressed="true"><i class="dot-salvia"></i>Salvia</button>
+          <button type="button" data-preference="accent" data-value="oliva" aria-pressed="false"><i class="dot-oliva"></i>Oliva</button>
+          <button type="button" data-preference="accent" data-value="arcilla" aria-pressed="false"><i class="dot-arcilla"></i>Arcilla</button>
+          <button type="button" data-preference="accent" data-value="sistema" aria-pressed="false"><i class="dot-sistema"></i>Sistema</button>
+          <button type="button" data-preference="accent" data-value="personalizado" aria-pressed="false"><i class="dot-personalizado"></i>Propio</button>
+        </div></fieldset>
+        <label class="custom-color-control" for="custom-accent"><span>Tu color de acento</span><input id="custom-accent" type="color" value="#63795e" /></label>
+        <fieldset><legend>COLORES DE LA VENTANA</legend><div class="segmented">
+          <button type="button" data-color-mode="tema" aria-pressed="true">Tema</button>
+          <button type="button" data-color-mode="propio" aria-pressed="false">Propios</button>
+        </div></fieldset>
+        <p class="panel-intro">Elige los colores del marco, la barra, las superficies y las pestañas. El contraste alto siempre tiene prioridad.</p>
+        <div class="custom-window-colors">
+          <label class="custom-color-control" for="chrome-color"><span>Marco y pestañas</span><input id="chrome-color" data-appearance-color="chromeColor" type="color" value="#e6e5dc" /></label>
+          <label class="custom-color-control" for="toolbar-color"><span>Barra de navegación</span><input id="toolbar-color" data-appearance-color="toolbarColor" type="color" value="#f4f2eb" /></label>
+          <label class="custom-color-control" for="surface-color"><span>Paneles y superficies</span><input id="surface-color" data-appearance-color="surfaceColor" type="color" value="#faf9f4" /></label>
+          <label class="custom-color-control" for="canvas-color"><span>Fondo de inicio</span><input id="canvas-color" data-appearance-color="canvasColor" type="color" value="#f4f2eb" /></label>
+          <label class="custom-color-control" for="tab-color"><span>Pestaña activa</span><input id="tab-color" data-appearance-color="tabColor" type="color" value="#faf9f4" /></label>
+        </div>
+        <fieldset><legend>FONDO DE INICIO</legend><div class="backdrop-options">
+          <button type="button" data-preference="backdrop" data-value="papel" aria-pressed="true"><i class="sample-papel"></i>Papel</button>
+          <button type="button" data-preference="backdrop" data-value="niebla" aria-pressed="false"><i class="sample-niebla"></i>Niebla</button>
+          <button type="button" data-preference="backdrop" data-value="lienzo" aria-pressed="false"><i class="sample-lienzo"></i>Lienzo</button>
+          <button type="button" data-preference="backdrop" data-value="video" id="video-backdrop-option" aria-pressed="false"><i class="sample-video"></i>Vídeo</button>
+        </div></fieldset>
+        <p class="panel-intro">Importa un vídeo una sola vez. Slate guarda su copia local y puedes reutilizarlo aunque muevas o borres el original. Siempre sin audio. Hasta 20 vídeos, máximo 120 MB cada uno.</p>
+        <div class="video-background-actions">
+          <span id="background-video-name">Sin vídeo elegido</span>
+          <label for="background-video-library">Tus vídeos guardados</label>
+          <select id="background-video-library" aria-label="Tus vídeos guardados"><option value="">Elige un vídeo guardado</option></select>
+          <button class="privacy-action secondary" id="choose-background-video" type="button">Importar vídeo</button>
+          <button class="privacy-action secondary" id="clear-background-video" type="button" hidden>Quitar del inicio</button>
+        </div>
+        <fieldset><legend>TIPOGRAFÍA</legend>
+          <label class="font-setting">Interfaz y controles<select data-font-preference="fontFamily" aria-label="Fuente de la interfaz">
+            <option value="sans">DM Sans</option><option value="system">Sistema</option><option value="editorial">Fraunces</option><option value="mono">IBM Plex Mono</option><option value="georgia">Georgia</option><option value="avenir">Avenir Next</option><option value="palatino">Palatino</option>
+          </select></label>
+          <label class="font-setting">Títulos del inicio y paneles<select data-font-preference="headingFont" aria-label="Fuente de los títulos">
+            <option value="editorial">Fraunces</option><option value="sans">DM Sans</option><option value="system">Sistema</option><option value="mono">IBM Plex Mono</option><option value="georgia">Georgia</option><option value="avenir">Avenir Next</option><option value="palatino">Palatino</option>
+          </select></label>
+          <p class="panel-intro">Fuentes locales, sin descargas externas. Si una fuente del sistema no está instalada, se usa una alternativa. No cambia la tipografía de las páginas web.</p>
+        </fieldset>
+        <fieldset><legend>DENSIDAD</legend><div class="segmented">
+          <button type="button" data-preference="density" data-value="cómoda" aria-pressed="true">Cómoda</button>
+          <button type="button" data-preference="density" data-value="compacta" aria-pressed="false">Compacta</button>
+        </div></fieldset>
+        <fieldset><legend>PESTAÑAS</legend><div class="segmented">
+          <button type="button" data-preference="tabStyle" data-value="superior" aria-pressed="true">Arriba</button>
+          <button type="button" data-preference="tabStyle" data-value="vertical" aria-pressed="false">Vertical</button>
+        </div></fieldset>
+        <fieldset><legend>CONTRASTE</legend><div class="segmented">
+          <button type="button" data-preference="contrast" data-value="normal" aria-pressed="true">Normal</button>
+          <button type="button" data-preference="contrast" data-value="alto" aria-pressed="false">Alto</button>
+          <button type="button" data-preference="contrast" data-value="sistema" aria-pressed="false">Sistema</button>
+        </div></fieldset>
+        <fieldset><legend>MARCA EN LA BARRA</legend><div class="segmented">
+          <button type="button" data-preference="logoPosition" data-value="izquierda" aria-pressed="true">Izquierda</button>
+          <button type="button" data-preference="logoPosition" data-value="centro" aria-pressed="false">Centro</button>
+        </div></fieldset>
+        <fieldset><legend>BARRA DEL LOGO Y NOMBRE</legend><div class="segmented">
+          <button type="button" data-preference="autoHideTitlebar" data-value="false" aria-pressed="true">Siempre visible</button>
+          <button type="button" data-preference="autoHideTitlebar" data-value="true" aria-pressed="false">Ocultar automáticamente</button>
+        </div></fieldset>
+        <p class="panel-intro">Acerca el cursor al borde superior para mostrarla. Las pestañas y la navegación siguen visibles.</p>
+        <fieldset>
+          <legend>TRANSPARENCIA DE LAS BARRAS</legend>
+          <label for="chrome-opacity">Opacidad de la barra superior</label>
+          <input id="chrome-opacity" type="range" min="10" max="100" step="1" value="45" aria-describedby="chrome-opacity-help" />
+          <output id="chrome-opacity-value" for="chrome-opacity">45%</output>
+          <p class="panel-intro" id="chrome-opacity-help">Menos opacidad deja ver más del fondo; el texto permanece nítido. En alto contraste las barras son opacas.</p>
+        </fieldset>
+        <fieldset><legend>BOTÓN NUEVA PESTAÑA</legend><div class="segmented">
+          <button type="button" data-preference="newTabPosition" data-value="inicio" aria-pressed="false">Antes</button>
+          <button type="button" data-preference="newTabPosition" data-value="final" aria-pressed="true">Después</button>
+        </div></fieldset>
+        <fieldset><legend>BARRA DE MARCADORES</legend><div class="segmented">
+          <button type="button" data-preference="bookmarksBar" data-value="true" aria-pressed="false">Mostrar</button>
+          <button type="button" data-preference="bookmarksBar" data-value="false" aria-pressed="true">Ocultar</button>
+        </div></fieldset>
+        <p class="panel-intro">La apariencia no cambia el contenido de los sitios ni desactiva la protección.</p>
+        <button class="privacy-action secondary" id="reset-appearance" type="button">Restablecer apariencia</button>
+      </section>
+      <section id="privacy-settings" class="privacy-settings" hidden>
+        <h3>Vídeo protegido · componente local</h3>
+        <p class="privacy-note" id="protected-video-status" role="status"></p>
+        <label class="privacy-checkbox">
+          <input id="protected-video-enabled" type="checkbox" />
+          <span>Permitir instalación, actualizaciones y contenido protegido</span>
+        </label>
+        <p class="privacy-note">Widevine se descarga desde su actualizador oficial y se ejecuta localmente. No envía los vídeos a servidores de Slate ni a intermediarios. El sitio puede contactar con su servidor de licencias. No se habilitan cámara, micrófono ni cookies de terceros.</p>
+        <p class="privacy-note">Desactivar impide futuras descargas y permisos nuevos; una descarga iniciada puede terminar y el componente ya cargado puede seguir activo hasta cerrar Slate. No verifica compatibilidad con una plataforma.</p>
+        <button class="privacy-action secondary" id="protected-video-retry" type="button">Instalar / actualizar componente</button>
+        <button class="privacy-action secondary" id="protected-video-check" type="button">Comprobar en esta pestaña</button>
+        <p class="privacy-note">En macOS, algunos servicios pueden exigir una firma VMP de producción adicional. Tener Widevine instalado no garantiza la reproducción en Netflix o Disney+.</p>
+        <p class="protection-status" id="protection-status" role="status"></p>
+        <p class="privacy-note" id="filter-error" role="alert" hidden></p>
+        <div class="privacy-metrics" aria-label="Bloqueos en esta pestaña">
+          <div><strong id="blocked-count">0</strong><span>Anuncios / rastreadores</span></div>
+          <div><strong id="cookies-count">0</strong><span>Cabeceras de cookies</span></div>
+          <div><strong id="cleaned-count">0</strong><span>Enlaces limpiados</span></div>
+        </div>
+        <p class="privacy-note">Contadores reales de esta pestaña, desde que la abriste. Las cookies indicadas son cabeceras de terceros retiradas.</p>
+        <button class="privacy-action" id="site-protection-toggle" type="button"></button>
+        <p class="privacy-note">La excepción afecta solo a anuncios y rastreadores del sitio, no a HTTPS, permisos, cookies ni aislamiento.</p>
+        <div class="privacy-rule"><span>Cookies</span><b id="coverage-cookies"></b></div>
+        <div class="privacy-rule"><span>Almacenamiento</span><b id="coverage-storage"></b></div>
+        <div class="privacy-rule"><span>Canvas</span><b id="coverage-canvas"></b></div>
+        <div class="privacy-rule"><span>Audio</span><b id="coverage-audio"></b></div>
+        <div class="privacy-rule"><span>WebGL</span><b id="coverage-webgl"></b></div>
+        <div class="privacy-rule"><span>Fuentes</span><b id="coverage-fonts"></b></div>
+        <p class="privacy-note">Política nativa configurada al arrancar. No es una medición de anonimato. Canvas, audio, WebGL y fuentes CSS pueden identificarte. Los accesos a almacenamiento sin partición se deniegan; algunos accesos integrados pueden requerir abrir el sitio directamente.</p>
+        <div class="privacy-rule"><span>Solo HTTPS</span><b>Sin volver a HTTP</b></div>
+        <div class="privacy-rule"><span>GPC y Do Not Track</span><b>Enviados</b></div>
+        <div class="privacy-rule"><span>WebRTC</span><b>UDP directo restringido</b></div>
+        <div class="privacy-rule"><span>Buscador</span><b id="current-search-engine">Google</b></div>
+        <label class="privacy-checkbox">
+          <input type="checkbox" id="remember-history" />
+          <span>Guardar historial de navegación</span>
+        </label>
+        <p class="privacy-note">Desactivado de forma predeterminada. Cambiarlo no borra el historial anterior.</p>
+        <div class="privacy-update">
+          <p class="privacy-note" id="filters-updated"></p>
+          <button class="privacy-action secondary" id="update-filters" type="button">Actualizar filtros</button>
+        </div>
+        <p class="privacy-note">Motor Ghostery con EasyList, EasyPrivacy y reglas de uBlock Origin, incluidos filtros de página para YouTube. Actualización cada 6 horas mientras la app esté abierta.</p>
+        <p class="privacy-warning">YouTube puede detectar o cambiar el bloqueo. No se garantiza eliminar todos sus anuncios. Esta versión no tiene la protección avanzada de huella digital de Brave ni oculta tu IP.</p>
+        <button class="privacy-action secondary" id="clear-site-data" type="button">Borrar datos de navegación…</button>
+      </section>
+      <button class="clear-history" id="clear-history" hidden>Borrar historial</button>
+    </aside>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div id="legal-gate" class="legal-gate" hidden>
+      <section class="legal-gate-card" role="dialog" aria-modal="true" aria-labelledby="legal-gate-title" aria-describedby="legal-gate-intro">
+        <p class="panel-kicker">ANTES DE EMPEZAR</p>
+        <h1 id="legal-gate-title">Lee y confirma</h1>
+        <p id="legal-gate-intro" class="legal-gate-intro">Slate Privacy es un navegador gratuito de Four One Solutions, República Dominicana. Revisa los documentos antes de continuar.</p>
+        <p class="legal-draft-notice"></p>
+        <div class="legal-gate-documents">
+          <button type="button" data-gate-document="terms">Leer términos</button>
+          <button type="button" data-gate-document="privacy">Leer aviso de privacidad</button>
+        </div>
+        <div class="legal-gate-reading" id="legal-gate-reading" tabindex="0" hidden></div>
+        <fieldset class="legal-consents">
+          <legend>Confirmaciones necesarias</legend>
+          <label><input id="legal-terms-check" type="checkbox" /><span>Acepto los términos de uso, versión <span data-legal-version></span>.</span></label>
+          <label><input id="legal-privacy-check" type="checkbox" /><span>He leído y comprendo el aviso de privacidad.</span></label>
+          <label><input id="legal-adult-check" type="checkbox" /><span>Confirmo que la persona que usará Slate tiene al menos <span data-minimum-age></span> años. Soy una persona adulta que acepta por sí misma, o padre, madre o tutor/a legal que acepta en nombre de esa persona menor.</span></label>
+        </fieldset>
+        <p id="legal-gate-error" class="legal-gate-error" role="alert" hidden></p>
+        <div class="legal-gate-actions">
+          <button type="button" id="legal-decline" class="legal-secondary">Declinar y salir</button>
+          <button type="button" id="legal-accept" disabled>Aceptar y continuar</button>
+        </div>
+        <p class="legal-gate-footnote">No solicitamos fecha de nacimiento ni datos personales para esta declaración.</p>
+      </section>
+    </div>
+    <script src="./legal-documents.cjs"></script>
+    <script src="./titlebar.cjs"></script>
+    <script src="./customization.cjs"></script>
+    <script src="./companion-ui.cjs"></script>
+    <script src="./secret.cjs"></script>
+    <script src="./experiences.cjs"></script>
+    <script src="./downloads-ui.cjs"></script>
+    <script src="./settings-ui.cjs"></script>
+    <script src="./updates-ui.cjs"></script>
+    <script src="./address-suggestions.cjs"></script>
+    <script src="./suggestion-policy.cjs"></script>
+    <script src="./address-ui.cjs"></script>
+    <script src="./tab-layout.cjs"></script>
+    <script src="./tabs-ui.cjs"></script>
+    <script src="./renderer.cjs"></script>
+  </body>
+</html>

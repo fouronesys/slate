@@ -1,0 +1,99 @@
+name: Preparar versión Mac arm64
+run-name: Preparar Slate ${{ inputs.version }} desde ${{ github.ref_name }}
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versión exacta de package.json, sin v'
+        type: string
+        required: true
+      authorize_submissions:
+        description: 'Autorizo esta compilación: subir motor a Castlabs si hace falta y app/DMG a Apple'
+        type: boolean
+        default: false
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: slate-release
+  cancel-in-progress: false
+jobs:
+  authorize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Exigir autorización y rama principal
+        env:
+          AUTHORIZED: ${{ inputs.authorize_submissions }}
+        run: |
+          test "$AUTHORIZED" = "true"
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_REPOSITORY" = "fouronesys/slate"
+  build:
+    needs: authorize
+    runs-on: macos-15
+    environment: slate-signing
+    permissions:
+      contents: write
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 10.26.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/chromium-browser run typecheck
+      - run: pnpm --filter @workspace/chromium-browser test
+      - run: pnpm --filter @workspace/chromium-browser run package:mac:check
+      - name: Preparar cliente VMP oficial
+        run: pnpm --filter @workspace/chromium-browser run video:setup
+      - name: Autenticar la cuenta Castlabs existente
+        env:
+          EVS_ACCOUNT_NAME: ${{ secrets.EVS_ACCOUNT_NAME }}
+          EVS_PASSWD: ${{ secrets.EVS_PASSWD }}
+          EVS_NO_ASK: '1'
+        run: |
+          test -n "$EVS_ACCOUNT_NAME"
+          test -n "$EVS_PASSWD"
+          python3 - <<'PY'
+          import runpy, sys
+          sys.path.insert(0, "artifacts/chromium-browser/release/vmp-client")
+          sys.argv = ["castlabs_evs.account", "--no-ask", "reauth"]
+          runpy.run_module("castlabs_evs.account", run_name="__main__")
+          PY
+      - name: Firmar, notarizar y verificar los artefactos
+        env:
+          SLATE_RELEASE_UPLOADS: 'yes'
+          SLATE_RELEASE_VERSION: ${{ inputs.version }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: pnpm --filter @workspace/chromium-browser run release:mac
+      - name: Crear borrador sin publicarlo
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          TAG="v$VERSION"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Ya existe esa entrega: no se sobrescribirá."
+            exit 1
+          fi
+          OUT="artifacts/chromium-browser/release-github"
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" --draft --title "Slate Privacy $VERSION" \
+            --notes "Mac arm64. Revisar antes de publicar. Intel y actualización real entre dos versiones: NO PROBADOS." \
+            "$OUT"/*.dmg "$OUT"/*.zip "$OUT"/*.yml "$OUT"/*.blockmap "$OUT/SHA256SUMS.txt"

@@ -1,0 +1,8 @@
+packages:
+  - artifacts/chromium-browser
+minimumReleaseAge: 1440
+autoInstallPeers: false
+onlyBuiltDependencies:
+  - electron
+overrides:
+  js-yaml: '4.3.2'
