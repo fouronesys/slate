@@ -1,12 +1,12 @@
 {
   "repository": "fouronesys/slate",
-  "release": "slate-backgrounds-1",
+  "release": "slate-backgrounds-2",
   "width": 1920,
   "height": 1080,
   "assets": [
-    { "name": "slate-dark-1080.mp4", "bytes": 2764280, "sha256": "2be8f03b49bb5ce92d1b6096977744621e39f175c17e93edc3b84d929ffe82ed" },
-    { "name": "slate-dark-1080.jpg", "bytes": 283954, "sha256": "dc546886350b112b33f2f5051642f2d144ef156485e770dad1f1215c52a812ca" },
-    { "name": "slate-light-1080.mp4", "bytes": 1453487, "sha256": "a0cc72094930db378c6f6311728168ace35c5a0d871e0a8c7324fded52803dbb" },
-    { "name": "slate-light-1080.jpg", "bytes": 51613, "sha256": "babab5eda9ab02eda25d3f3fa71937c5cd9b6004aa451afc41ad3f0a5851f97d" }
+    { "name": "slate-dark-1080.mp4", "bytes": 450671, "sha256": "4dfb5fdade866b1e32dd9de4af573457206bc0c3eddc369da9f1995d299aedb8" },
+    { "name": "slate-dark-1080.jpg", "bytes": 36091, "sha256": "6f8589de722047607c82f37e023a4ffc0a3be366a3f5a2c31cc8892a9c0ad2eb" },
+    { "name": "slate-light-1080.mp4", "bytes": 443963, "sha256": "fa49f0fe5640253606b77e175d344710d603f40b4e4abe9299e1faa3e904fa25" },
+    { "name": "slate-light-1080.jpg", "bytes": 34691, "sha256": "71e6214b47423f9ff90304ed7338b2b63c10a6cade8fe842f43b40e6285a9a26" }
   ]
 }

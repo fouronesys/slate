@@ -8,6 +8,16 @@ const { createHash } = require("node:crypto");
 const { defaultBackground } = require("../src/default-backgrounds.cjs");
 const { DEFAULT_APPEARANCE, normalizeAppearance, updateAppearance } = require("../src/appearance.cjs");
 const { validAsset } = require("../scripts/prepare-backgrounds.cjs");
+test("the package pins the approved symmetric logo animations, not discarded backgrounds", () => {
+  const manifest = require("../src/default-backgrounds.json");
+  assert.equal(manifest.release, "slate-backgrounds-2");
+  assert.equal(manifest.width, 1920);
+  assert.equal(manifest.height, 1080);
+  assert.equal(manifest.assets.find(asset => asset.name === "slate-dark-1080.mp4").sha256,
+    "4dfb5fdade866b1e32dd9de4af573457206bc0c3eddc369da9f1995d299aedb8");
+  assert.equal(manifest.assets.find(asset => asset.name === "slate-light-1080.mp4").sha256,
+    "fa49f0fe5640253606b77e175d344710d603f40b4e4abe9299e1faa3e904fa25");
+});
 test("new profiles use local Slate videos; saved choices are never migrated over", () => {
   assert.equal(DEFAULT_APPEARANCE.backdrop, "slate");
   for (const backdrop of ["papel", "niebla", "lienzo", "video"]) {

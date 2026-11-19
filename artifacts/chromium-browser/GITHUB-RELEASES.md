@@ -3,7 +3,10 @@
 ## Fondos incluidos de Slate
 
 Los fondos claro y oscuro son vídeos locales H.264, 1920×1080, sin audio, con
-un bucle de siete segundos y una imagen fija para reducir movimiento.
+un bucle de ocho segundos y una imagen fija para reducir movimiento.
+La pareja aprobada utiliza la S original centrada, con deformación visible
+de sus dos mitades y reconstrucción simétrica: plateado en oscuro y grafito
+en claro. No se incluyen los fondos abstractos descartados.
 `Slate automático` es el valor de las instalaciones nuevas; los fondos
 guardados de perfiles existentes no se sustituyen. Para activarlo en un
 perfil anterior: Apariencia → Fondo de inicio → Slate automático.
@@ -15,7 +18,7 @@ pnpm --filter @workspace/chromium-browser run backgrounds:fetch
 ```
 
 Requiere GitHub CLI autenticado con acceso al repositorio mientras los recursos
-estén en el borrador `slate-backgrounds-1`. La compilación de GitHub usa su propio
+estén en el borrador `slate-backgrounds-2`. La compilación de GitHub usa su propio
 token temporal, sólo en ese paso. También se admite `--source carpeta` para una
 copia local de los cuatro archivos originales. Se comprueban tamaño y SHA-256
 antes de empaquetar; si falla la descarga o la integridad, se detiene la creación
