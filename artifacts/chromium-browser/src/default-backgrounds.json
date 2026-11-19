@@ -1,0 +1,12 @@
+{
+  "repository": "fouronesys/slate",
+  "release": "slate-backgrounds-1",
+  "width": 1920,
+  "height": 1080,
+  "assets": [
+    { "name": "slate-dark-1080.mp4", "bytes": 2764280, "sha256": "2be8f03b49bb5ce92d1b6096977744621e39f175c17e93edc3b84d929ffe82ed" },
+    { "name": "slate-dark-1080.jpg", "bytes": 283954, "sha256": "dc546886350b112b33f2f5051642f2d144ef156485e770dad1f1215c52a812ca" },
+    { "name": "slate-light-1080.mp4", "bytes": 1453487, "sha256": "a0cc72094930db378c6f6311728168ace35c5a0d871e0a8c7324fded52803dbb" },
+    { "name": "slate-light-1080.jpg", "bytes": 51613, "sha256": "babab5eda9ab02eda25d3f3fa71937c5cd9b6004aa451afc41ad3f0a5851f97d" }
+  ]
+}

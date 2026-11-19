@@ -51,6 +51,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: pnpm install --frozen-lockfile
+      - name: Obtener fondos locales con integridad comprobada
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: pnpm --filter @workspace/chromium-browser run backgrounds:fetch
       - run: pnpm --filter @workspace/chromium-browser run typecheck
       - run: pnpm --filter @workspace/chromium-browser test
       - run: pnpm --filter @workspace/chromium-browser run package:mac:check

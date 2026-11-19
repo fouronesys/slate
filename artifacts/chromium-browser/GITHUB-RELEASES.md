@@ -1,5 +1,33 @@
 # Entregas y actualizaciones desde GitHub
 
+## Fondos incluidos de Slate
+
+Los fondos claro y oscuro son vídeos locales H.264, 1920×1080, sin audio, con
+un bucle de siete segundos y una imagen fija para reducir movimiento.
+`Slate automático` es el valor de las instalaciones nuevas; los fondos
+guardados de perfiles existentes no se sustituyen. Para activarlo en un
+perfil anterior: Apariencia → Fondo de inicio → Slate automático.
+
+Antes de desarrollar o empaquetar, ejecuta:
+
+```sh
+pnpm --filter @workspace/chromium-browser run backgrounds:fetch
+```
+
+Requiere GitHub CLI autenticado con acceso al repositorio mientras los recursos
+estén en el borrador `slate-backgrounds-1`. La compilación de GitHub usa su propio
+token temporal, sólo en ese paso. También se admite `--source carpeta` para una
+copia local de los cuatro archivos originales. Se comprueban tamaño y SHA-256
+antes de empaquetar; si falla la descarga o la integridad, se detiene la creación
+del instalador. Los vídeos y sus imágenes se incluyen en `extraResources`;
+la aplicación instalada no descarga fondos, no necesita GitHub CLI ni credenciales.
+
+Los originales duraderos se conservan en App Storage. Los binarios no se
+incluyen en los commits: el flujo manual `Conservar recursos de fondos` transfiere
+los recursos iniciales comprobados a un borrador de recursos, sin publicarlo ni
+firmar/notarizar ninguna aplicación. No debe publicarse como versión del navegador.
+La preparación del código 0.1.2 no autoriza una nueva compilación firmada.
+
 Repositorio: **https://github.com/fouronesys/slate**.
 
 Se publica una exportación limpia del navegador, no el historial de Replit,

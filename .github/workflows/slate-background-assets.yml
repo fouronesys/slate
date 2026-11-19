@@ -1,0 +1,40 @@
+name: Conservar recursos de fondos
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Copiar recursos comprobados a su borrador privado
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "fouronesys/slate"
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$(gh release view slate-backgrounds-1 --json isDraft --jq .isDraft)" = "true"
+          mkdir -p generated-artifacts/asset-transfer
+          python3 - <<'PY'
+          import json, subprocess, base64, hashlib, pathlib
+          root = pathlib.Path("generated-artifacts/asset-transfer")
+          blobs = {
+            "slate-dark-1080.mp4": "45f9a286f6452f1dd5903ca61502165b175f3b43",
+            "slate-dark-1080.jpg": "c1b543228b14e62c4dd229395cd38852f63d45d9",
+            "slate-light-1080.mp4": "a59fd0dff23abae9e1b89414c05d9e3a3f3f9a23",
+            "slate-light-1080.jpg": "ba4fc237a3a6c546e1ff1990749d7719ff30ddb4",
+          }
+          manifest = json.loads(pathlib.Path("artifacts/chromium-browser/src/default-backgrounds.json").read_text())
+          for asset in manifest["assets"]:
+              name = asset["name"]
+              response = subprocess.check_output(["gh", "api", "repos/fouronesys/slate/git/blobs/" + blobs[name]])
+              data = base64.b64decode(json.loads(response)["content"])
+              assert len(data) == asset["bytes"] and hashlib.sha256(data).hexdigest() == asset["sha256"], name
+              (root / name).write_bytes(data)
+          PY
+          gh release upload slate-backgrounds-1 generated-artifacts/asset-transfer/*.mp4 generated-artifacts/asset-transfer/*.jpg

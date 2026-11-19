@@ -1,6 +1,9 @@
 let currentBackgroundVideoUrl = "";
 let lastAppearanceKey = "";
 let lastVideoLibraryKey = "";
+let lastBackgroundState;
+let lastBackgroundOnHome = false;
+const backgroundMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 function renderAppearance(nextState) {
   const preferences = nextState.appearance;
@@ -65,9 +68,12 @@ function renderAppearance(nextState) {
     tab: { bg: "--tab-bg", ink: "--tab-ink", muted: "--tab-muted", line: "--tab-line", quiet: "--tab-quiet" },
   };
   for (const [zone, properties] of Object.entries(themeColors)) {
-    const palette = root.dataset.contrast !== "alto" && preferences.colorMode === "propio" && /^#[0-9a-f]{6}$/i.test(colors[zone] || "")
+    let palette = root.dataset.contrast !== "alto" && preferences.colorMode === "propio" && /^#[0-9a-f]{6}$/i.test(colors[zone] || "")
       ? window.SlateTheme?.palette(colors[zone])
       : null;
+    if (zone === "canvas" && preferences.backdrop === "slate" && root.dataset.contrast !== "alto") {
+      palette = window.SlateTheme?.palette(root.dataset.theme === "oscuro" ? "#25282a" : "#ebe5da");
+    }
     for (const [part, suffix] of Object.entries(properties)) {
       const variable = `--user-${zone}-${part}`;
       if (palette && palette[{ bg: "background", ink: "ink", muted: "muted", line: "line", quiet: "quiet" }[part]]) {
@@ -103,7 +109,7 @@ function renderAppearance(nextState) {
   if (document.activeElement !== colorPicker) colorPicker.value = preferences.customAccent;
   const backgroundName = document.getElementById("background-video-name");
   backgroundName.textContent = nextState.backgroundVideoName || "Sin vídeo elegido";
-  document.getElementById("clear-background-video").hidden = !nextState.backgroundVideoUrl;
+  document.getElementById("clear-background-video").hidden = !nextState.backgroundVideoFile || preferences.backdrop !== "video";
   const library = document.getElementById("background-video-library");
   const libraryKey = JSON.stringify(nextState.backgroundVideos || []);
   if (libraryKey !== lastVideoLibraryKey) {
@@ -111,7 +117,7 @@ function renderAppearance(nextState) {
     library.replaceChildren(new Option("Elige un vídeo guardado", ""));
     for (const item of nextState.backgroundVideos || []) library.append(new Option(item.name, item.fileName));
   }
-  if (document.activeElement !== library) library.value = nextState.backgroundVideoFile || "";
+  if (document.activeElement !== library) library.value = preferences.backdrop === "video" ? nextState.backgroundVideoFile || "" : "";
 }
 
 for (const button of document.querySelectorAll("[data-color-mode]")) {
@@ -143,9 +149,13 @@ for (const picker of document.querySelectorAll("[data-appearance-color]")) {
 }
 
 function syncBackgroundVideo(nextState, onHomePage) {
+  lastBackgroundState = nextState;
+  lastBackgroundOnHome = onHomePage;
   const video = document.getElementById("home-background-video");
-  const enabled = nextState.appearance?.backdrop === "video" && Boolean(nextState.backgroundVideoUrl);
-  const nextUrl = enabled ? nextState.backgroundVideoUrl : "";
+  const enabled = ["video", "slate"].includes(nextState.appearance?.backdrop) && Boolean(nextState.backgroundVideoUrl);
+  const still = backgroundMotion.matches && Boolean(nextState.backgroundVideoPoster);
+  video.poster = enabled ? nextState.backgroundVideoPoster || "" : "";
+  const nextUrl = enabled && !still ? nextState.backgroundVideoUrl : "";
   if (nextUrl !== currentBackgroundVideoUrl) {
     video.pause();
     if (nextUrl) {
@@ -163,11 +173,16 @@ function syncBackgroundVideo(nextState, onHomePage) {
   if (scrim) scrim.hidden = true;
   video.muted = true;
   video.volume = 0;
-  if (enabled && onHomePage && !highContrast) {
-    if (video.paused) video.play().catch(() => showToast("No se pudo reproducir el formato de vídeo elegido."));
+  if (enabled && onHomePage && !highContrast && !document.hidden && !backgroundMotion.matches) {
+    if (video.paused) video.play().catch(error => {
+      if (error.name !== "AbortError") showToast("No se pudo reproducir el formato de vídeo elegido.");
+    });
   } else {
     video.pause();
   }
+}
+for (const [target, event] of [[backgroundMotion, "change"], [document, "visibilitychange"]]) {
+  target.addEventListener(event, () => { if (lastBackgroundState) syncBackgroundVideo(lastBackgroundState, lastBackgroundOnHome); });
 }
 
 const chromeOpacity = document.getElementById("chrome-opacity");

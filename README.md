@@ -18,8 +18,9 @@ La primera instalación del actualizador es manual; después se consulta GitHub 
 
 ## Estado de validación
 
-Pruebas de lógica e interfaz verificadas en desarrollo. La nueva cadena de GitHub, su DMG
-y la actualización firmada entre dos versiones necesitan validación real en un Mac.
+Pruebas de lógica e interfaz verificadas en desarrollo. La entrega arm64 0.1.1 de GitHub
+se compiló firmada y notarizada; su instalación fue confirmada por el usuario.
+La actualización firmada entre dos versiones aún necesita validación real en un Mac.
 Intel y el asistente no están cubiertos por la entrega arm64 inicial.
 
 Los componentes de terceros conservan sus licencias. Un repositorio público no

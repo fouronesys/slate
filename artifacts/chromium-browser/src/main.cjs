@@ -5,6 +5,7 @@ const { SearchSuggestions } = require("./search-suggestions.cjs");
 const { searchUrl } = require("./search-engines.cjs");
 const { tabMenuEntries } = require("./tabs-menu.cjs");
 const { AppUpdates } = require("./app-updates.cjs");
+const { defaultBackground } = require("./default-backgrounds.cjs");
 let suggestionSession;
 const searchSuggestions = new SearchSuggestions({
   fetch: (url, options) => {
@@ -386,8 +387,16 @@ function getBackgroundVideoPath(fileName = backgroundVideoFile) {
 }
 
 function getBackgroundVideoUrl() {
+  const builtin = getDefaultBackground();
+  if (builtin) return builtin.url;
   const filePath = getBackgroundVideoPath();
   return filePath ? pathToFileURL(filePath).href : null;
+}
+
+function getDefaultBackground() {
+  const directory = app.isPackaged ? path.join(process.resourcesPath, "default-backgrounds") :
+    path.resolve(__dirname, "../../../generated-artifacts/slate-default-backgrounds");
+  return defaultBackground(appearance, nativeTheme.shouldUseDarkColors, directory);
 }
 
 function readJson(name, fallback) {
@@ -444,7 +453,9 @@ function snapshot(incremental = false) {
     systemHighContrast: nativeTheme.shouldUseHighContrastColors,
     systemAccentColor: getSystemAccentColor(),
     backgroundVideoUrl: getBackgroundVideoUrl(),
-    backgroundVideoName: backgroundVideos.find(video => video.fileName === backgroundVideoFile)?.name || (backgroundVideoFile ? "Vídeo local silenciado" : ""),
+    backgroundVideoPoster: getDefaultBackground()?.poster || "",
+    backgroundVideoBuiltin: Boolean(getDefaultBackground()),
+    backgroundVideoName: getDefaultBackground()?.name || backgroundVideos.find(video => video.fileName === backgroundVideoFile)?.name || (backgroundVideoFile ? "Vídeo local silenciado" : ""),
     backgroundVideos,
     backgroundVideoFile,
     platform: process.platform,
@@ -1211,7 +1222,7 @@ function addIpcHandlers() {
   });
   handle("browser:set-appearance", (_event, patch) => {
     const next = updateAppearance(appearance, patch);
-    if (patch.backdrop === "video" && !getBackgroundVideoUrl()) {
+    if (patch.backdrop === "video" && (!getBackgroundVideoPath() || !fs.existsSync(getBackgroundVideoPath()))) {
       throw new Error("Elige un vídeo local antes de activar ese fondo.");
     }
     if (!writeJson("appearance.json", next)) throw new Error("No se pudo guardar la apariencia");

@@ -137,7 +137,12 @@ input::placeholder { color: var(--quiet); }
 .home-background-video { position: fixed; z-index: 0; top: var(--chrome-height); left: var(--sidebar-width); right: auto; bottom: auto; width: calc(100vw - var(--sidebar-width) - var(--panel-width)); height: calc(100dvh - var(--chrome-height)); object-fit: cover; pointer-events: none; }
 .home-background-scrim { display: none; pointer-events: none; background: transparent; }
 .home-content { position: relative; z-index: 2; }
-:root[data-backdrop="video"] .home-screen { background: transparent; }
+:root:is([data-backdrop="video"], [data-backdrop="slate"]) .home-screen { background: transparent; }
+:root[data-backdrop="slate"]:not([data-contrast="alto"]) .slate-widget[data-widget="clock"] {
+  background: color-mix(in srgb, var(--user-canvas-bg, var(--canvas)) 90%, transparent);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
 :root[data-contrast="alto"] .home-background-video { visibility: hidden; }
 .home-screen.is-hidden { visibility: hidden; pointer-events: none; }
 :root[data-backdrop="niebla"] .home-screen { background: radial-gradient(ellipse at 18% 12%, var(--accent-wash), transparent 65%), var(--canvas); }

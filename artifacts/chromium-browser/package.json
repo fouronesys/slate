@@ -1,6 +1,6 @@
 {
   "name": "@workspace/chromium-browser",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "engines": {
     "node": ">=22.12.0"
@@ -13,6 +13,8 @@
     "package:mac": "node scripts/package-mac.cjs",
     "package:mac:check": "node scripts/package-mac.cjs --check",
     "release:mac": "node scripts/release-mac.cjs",
+    "backgrounds:fetch": "node scripts/prepare-backgrounds.cjs",
+    "test:backgrounds": "bash ./scripts/preview.sh scripts/verify-default-backgrounds.cjs",
     "test:updates": "bash ./scripts/preview.sh scripts/verify-app-updates.cjs",
     "video:setup": "node scripts/vmp.cjs setup",
     "video:account": "node scripts/vmp.cjs account",
@@ -64,6 +66,13 @@
     "directories": {
       "output": "release"
     },
+    "extraResources": [
+      {
+        "from": "../../generated-artifacts/slate-default-backgrounds",
+        "to": "default-backgrounds",
+        "filter": ["*.mp4", "*.jpg"]
+      }
+    ],
     "files": [
       "src/**/*",
       "package.json"

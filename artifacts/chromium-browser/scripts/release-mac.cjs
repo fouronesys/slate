@@ -50,6 +50,7 @@ async function main() {
   const pkg = require("../package.json");
   releaseGate(process.env, pkg);
   if (process.platform !== "darwin") throw new Error("La entrega firmada exige macOS.");
+  require("./prepare-backgrounds.cjs").prepareBackgrounds();
   if (fs.existsSync(output)) throw new Error("release-github ya existe; usa un checkout limpio para no mezclar entregas.");
   function run(command, args, options = {}) {
     const result = spawnSync(command, args, { cwd: root, stdio: "inherit", ...options });

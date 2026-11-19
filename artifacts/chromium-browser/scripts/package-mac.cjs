@@ -100,6 +100,7 @@ async function main(args = process.argv.slice(2)) {
   if (process.platform !== "darwin") {
     throw new Error("La creación del DMG requiere macOS (hdiutil/Finder). Ejecuta este mismo comando en un Mac.");
   }
+  require("./prepare-backgrounds.cjs").prepareBackgrounds();
   const hdiutil = spawnSync("/usr/bin/hdiutil", ["help"], { stdio: "ignore" });
   if (hdiutil.status !== 0) throw new Error("No se pudo ejecutar hdiutil en este Mac.");
   const cli = require.resolve("electron-builder/out/cli/cli.js");

@@ -54,6 +54,7 @@ async function waitFor(check, label, timeout = 15000) {
   await ui("document.querySelector('[data-color-mode=\"propio\"]').click()");
   await waitFor(async () => (await state()).appearance.colorMode === "propio", "color mode");
   const colors = { chromeColor: "#183148", toolbarColor: "#edd2b6", surfaceColor: "#273c32", canvasColor: "#f5f0e5", tabColor: "#8d4d62" };
+  await appearance({ backdrop: "papel" }); // Test custom solid canvas independently of bundled video.
   for (const [key, value] of Object.entries(colors)) {
     await ui(`(() => { const input = document.querySelector('[data-appearance-color="${key}"]'); input.value=${JSON.stringify(value)}; input.dispatchEvent(new Event('change', {bubbles:true})); })()`);
     await waitFor(async () => (await state()).appearance[key] === value, key);
