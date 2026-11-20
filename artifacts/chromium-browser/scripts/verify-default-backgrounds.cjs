@@ -40,13 +40,35 @@ async function waitFor(check, label) {
   assert.equal((await state()).appearance.backdrop, "slate");
   await appearance({ theme: "claro" });
   await playing("slate-light-1080.mp4");
+  await waitFor(() => ui("document.documentElement.dataset.localContrast==='active' && Number(document.documentElement.dataset.localContrastFrames)>0"), "contraste local claro");
   assert.equal(await ui("getComputedStyle(document.getElementById('home-screen')).backgroundColor"), "rgba(0, 0, 0, 0)");
   await delay(200);
   fs.writeFileSync(path.join(out, "slate-light-in-app.png"), (await win.webContents.capturePage()).toPNG());
   await appearance({ theme: "oscuro" });
   await playing("slate-dark-1080.mp4");
+  await waitFor(() => ui("document.documentElement.dataset.localContrast==='active' && Number(document.documentElement.dataset.localContrastFrames)>1"), "contraste local oscuro");
+  assert.equal(await ui("getComputedStyle(document.querySelector('.home-search')).backgroundColor"), "rgba(0, 0, 0, 0)");
+  assert.ok(await ui("document.querySelector('.home-search').classList.contains('lc-border')"));
+  await ui(`(() => { const input=document.querySelector('.home-search input'); input.focus(); input.value='Buscar en Slate'; input.dispatchEvent(new Event('input',{bubbles:true})); input.setSelectionRange(0,6); })()`);
+  assert.deepEqual(await ui("(() => { const i=document.querySelector('.home-search input'); return [i.value,i.selectionStart,i.selectionEnd,document.activeElement===i]; })()"),
+    ["Buscar en Slate", 0, 6, true]);
+  win.webContents.focus();
+  win.webContents.sendInputEvent({ type: "char", keyCode: "X" });
+  await waitFor(() => ui("document.querySelector('.home-search input').value==='X en Slate'"), "escritura nativa con selección");
+  await ui("document.querySelector('.home-search input').value=''");
   await delay(200);
   fs.writeFileSync(path.join(out, "slate-dark-in-app.png"), (await win.webContents.capturePage()).toPNG());
+  // A disposable layout demonstrates the control crossing the actual logo.
+  await ui(`(() => {
+    const w=document.querySelector('[data-widget="search"]');
+    w.style.transform='translateY(190px)';
+    document.querySelector('.home-search input').value='Contraste local sobre el logo';
+  })()`);
+  await delay(350);
+  assert.ok(await ui("document.querySelector('.home-search input').classList.contains('lc-input')"));
+  fs.writeFileSync(path.join(out, "slate-local-contrast-detail.png"), (await win.webContents.capturePage()).toPNG());
+  console.info("LOCAL CONTRAST: last frame cost (ms)", await ui("document.documentElement.dataset.localContrastCostMs"));
+  await ui(`document.querySelector('[data-widget="search"]').style.removeProperty('transform'); document.querySelector('.home-search input').value=''`);
   await appearance({ theme: "sistema" });
   // Simulate the OS signal, not themeSource: Slate correctly owns themeSource.
   const themeDescriptor = Object.getOwnPropertyDescriptor(nativeTheme, "shouldUseDarkColors");
@@ -68,11 +90,17 @@ async function waitFor(check, label) {
   win.webContents.debugger.attach("1.3");
   await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await waitFor(() => ui("(() => { const v=document.getElementById('home-background-video'); return v.paused && !v.hasAttribute('src') && v.poster.endsWith('slate-dark-1080.jpg') && !v.hidden; })()"), "imagen fija sin decodificación");
+  await waitFor(() => ui("document.documentElement.dataset.localContrast==='active'"), "contraste sobre imagen fija");
+  await delay(400);
+  const stillFrames = await ui("document.documentElement.dataset.localContrastFrames");
+  await delay(250);
+  assert.equal(await ui("document.documentElement.dataset.localContrastFrames"), stillFrames, "el póster no mantiene un bucle de cálculo");
   await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "no-preference" }] });
   win.webContents.debugger.detach();
   await playing("slate-dark-1080.mp4");
   await appearance({ contrast: "alto" });
   await waitFor(() => ui("document.getElementById('home-background-video').hidden && document.getElementById('home-background-video').paused"), "alto contraste");
+  await waitFor(() => ui("!document.documentElement.dataset.localContrast && !document.querySelector('.lc-input')"), "restauración de alto contraste");
   await appearance({ contrast: "normal" });
   const originalDialog = dialog.showOpenDialog;
   try {
@@ -92,6 +120,10 @@ async function waitFor(check, label) {
   assert.equal((await state()).backgroundVideoFile, imported);
   await appearance({ backdrop: "papel" });
   await waitFor(() => ui("document.getElementById('home-background-video').hidden && document.getElementById('home-background-video').paused"), "fondo desactivado");
+  await waitFor(() => ui("!document.documentElement.dataset.localContrast"), "contraste local desactivado");
+  const idleFrames = await ui("document.documentElement.dataset.localContrastFrames");
+  await delay(250);
+  assert.equal(await ui("document.documentElement.dataset.localContrastFrames"), idleFrames);
   assert.ok(await ui("getComputedStyle(document.getElementById('home-background-scrim')).display==='none'"));
   assert.deepEqual(errors, []);
   console.info("PASS: 1080p decoding, muted playback, theme switching, simulated system signal, static reduced-motion poster, high contrast, saved personal video preserved, disable and no scrim.");

@@ -1,0 +1,55 @@
+/* The wallpaper itself is never filtered, sampled from the screen or veiled. */
+.lc-text, .lc-input {
+  background-image: var(--lc-image) !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  background-origin: border-box !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+.lc-input { caret-color: var(--lc-caret, currentColor); }
+.lc-text[data-lc-wrapper] { display: inline-block; max-width: 100%; vertical-align: bottom; }
+.lc-input::placeholder { -webkit-text-fill-color: transparent; opacity: 1; }
+.lc-text::selection, .lc-input::selection {
+  background: Highlight;
+  color: HighlightText;
+  -webkit-text-fill-color: HighlightText;
+}
+.lc-border { position: relative; border-color: transparent !important; }
+.lc-border::after, .lc-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--lc-image);
+  background-size: 100% 100%;
+}
+.lc-border::after {
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+.lc-border:focus-within::after { padding: 2px; }
+.lc-icon-wrap { position: relative; display: inline-flex; flex: 0 0 auto; }
+.lc-icon > svg { visibility: hidden; }
+.lc-icon::after { mask: var(--lc-mask) center / 100% 100% no-repeat; }
+:root[data-local-contrast="active"] .slate-home-grid[data-widget-background="false"] .slate-widget[data-widget="clock"] {
+  background: transparent;
+  padding: 0;
+}
+:root[data-contrast="alto"] :is(.lc-text, .lc-input) {
+  background-image: none !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+:root[data-contrast="alto"] .lc-border { border-color: var(--ink) !important; }
+:root[data-contrast="alto"] :is(.lc-border, .lc-icon)::after { display: none; }
+:root[data-contrast="alto"] .lc-icon > svg { visibility: visible; }
+@media (forced-colors: active) {
+  .lc-text, .lc-input { background-image: none !important; -webkit-text-fill-color: currentColor !important; }
+  .lc-border { border-color: CanvasText !important; }
+  .lc-border::after, .lc-icon::after { display: none; }
+  .lc-icon > svg { visibility: visible; }
+}

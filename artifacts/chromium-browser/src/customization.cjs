@@ -4,6 +4,9 @@ let lastVideoLibraryKey = "";
 let lastBackgroundState;
 let lastBackgroundOnHome = false;
 const backgroundMotion = matchMedia("(prefers-reduced-motion: reduce)");
+window.addEventListener("slate-contrast-error", () => {
+  showToast("No se pudo adaptar el contraste de este fondo. Se conserva la presentación estándar.");
+});
 
 function renderAppearance(nextState) {
   const preferences = nextState.appearance;
