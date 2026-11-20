@@ -1,6 +1,7 @@
 (function (root) {
   "use strict";
   const MIN_WIDTH = 80;
+  const MAX_WIDTH = 225;
   const GAP = 3;
   function fitTabs(tabs, activeId, width, { vertical = false, previousStart = 0 } = {}) {
     if (!tabs.length) return { ids: [], start: 0, hidden: 0, tight: false };
@@ -15,7 +16,7 @@
     return { ids, start, hidden: tabs.length - ids.length,
       tight: (available - GAP * (ids.length - 1)) / ids.length < 110 };
   }
-  const api = { fitTabs, MIN_WIDTH, GAP };
+  const api = { fitTabs, MIN_WIDTH, MAX_WIDTH, GAP };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.SlateTabLayout = api;
 })(typeof window !== "undefined" ? window : globalThis);

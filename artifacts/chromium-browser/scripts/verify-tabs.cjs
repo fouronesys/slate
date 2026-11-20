@@ -61,7 +61,9 @@ async function waitFor(check, label) {
       count: document.getElementById("all-tabs-count").textContent,
       newButton: document.getElementById("new-tab").getBoundingClientRect().toJSON(),
       selector: document.getElementById("all-tabs").getBoundingClientRect().toJSON(),
-      viewport: innerWidth
+      viewport: innerWidth,
+      vertical: document.documentElement.dataset.tabStyle === "vertical",
+      newPosition: document.documentElement.dataset.newTabPosition
     };
   })()`);
   const checkFit = async () => {
@@ -75,9 +77,22 @@ async function waitFor(check, label) {
     }
     assert.ok(m.newButton.left >= 0 && m.newButton.right <= m.viewport);
     assert.ok(m.selector.right <= m.viewport);
+    if (!m.vertical && m.newPosition !== "inicio") {
+      const lastTab = m.visible.at(-1);
+      assert.ok(lastTab && m.newButton.left >= lastTab.right - 1 &&
+        m.newButton.left - lastTab.right <= 9, "new-tab button immediately follows the last visible tab");
+    }
     return m;
   };
   const first = (await snapshot()).activeTabId;
+  win.setContentSize(1320, 720);
+  await checkFit();
+  for (let i = 0; i < 2; i++) await ui("document.getElementById('new-tab').click()");
+  await waitFor(async () => (await snapshot()).tabs.length === 3, "new-tab button opens tabs");
+  await checkFit();
+  fs.mkdirSync(path.resolve(__dirname, "../../../generated-artifacts"), { recursive: true });
+  fs.writeFileSync(path.resolve(__dirname, "../../../generated-artifacts/slate-tabs-adjacent.png"),
+    (await win.webContents.capturePage()).toPNG());
   // Replit's small desktop may constrain a new window automatically; a Mac
   // can keep the full initial width, where all 14 tabs legitimately fit.
   // Establish the narrow-viewport precondition before asserting overflow.
@@ -85,7 +100,7 @@ async function waitFor(check, label) {
   await waitFor(() => ui("innerWidth <= 900"), "narrow test viewport");
   await ui("window.brujula.navigate('https://tabs.test/')");
   await waitFor(async () => (await snapshot()).tabs.every(tab => !tab.loading), "fixture page");
-  for (let i = 0; i < 13; i++) await ui("window.brujula.newTab()");
+  for (let i = 0; i < 11; i++) await ui("window.brujula.newTab()");
   await waitFor(async () => (await snapshot()).tabs.length === 14, "many tabs");
   let m = await checkFit();
   assert.equal(m.count, "14");

@@ -1,6 +1,9 @@
 .tabs-list { flex: 1 1 auto; overflow-x: hidden; scrollbar-width: none; }
 .tabs-list::-webkit-scrollbar { display: none; }
-:root:not([data-tab-style="vertical"]) .tabs-list { overflow-y: hidden; }
+:root:not([data-tab-style="vertical"]) .tabs-list {
+  flex: 0 1 var(--tabs-preferred-width, auto);
+  overflow-y: hidden;
+}
 :root:not([data-tab-style="vertical"]) .tab {
   width: 225px; min-width: 0; max-width: 225px; flex: 1 1 225px;
 }

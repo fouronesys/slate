@@ -10,6 +10,13 @@
   function fit() {
     const workspace = state.features?.workspaceId || "personal";
     const vertical = document.documentElement.dataset.tabStyle === "vertical";
+    count.textContent = String(state.tabs.length);
+    button.hidden = state.tabs.length < 2;
+    // Size from ALL tabs, including hidden ones: a narrow window must still
+    // be able to reveal more tabs when widened. Never grow into empty space.
+    const { MAX_WIDTH, GAP } = window.SlateTabLayout;
+    list.style.setProperty("--tabs-preferred-width",
+      `${state.tabs.length * MAX_WIDTH + Math.max(0, state.tabs.length - 1) * GAP}px`);
     const layout = window.SlateTabLayout.fitTabs(state.tabs, state.activeTabId, list.clientWidth,
       { vertical, previousStart: starts.get(workspace) || 0 });
     if (!vertical) starts.set(workspace, layout.start);
@@ -19,8 +26,6 @@
     }
     list.classList.toggle("tabs-tight", layout.tight);
     if (!vertical && list.scrollLeft) list.scrollLeft = 0;
-    count.textContent = String(state.tabs.length);
-    button.hidden = state.tabs.length < 2;
     const label = `Todas las pestañas: ${state.tabs.length} abiertas` +
       (layout.hidden ? `, ${layout.hidden} en la lista` : "");
     button.title = label;
