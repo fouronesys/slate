@@ -19,7 +19,7 @@ async function waitFor(check, label, timeout = 15000) {
 const output = path.resolve(__dirname, "../../../generated-artifacts");
 const failures = [];
 app.on("web-contents-created", (_event, contents) => {
-  contents.on("console-message", (_event, details) => {
+  contents.on("console-message", details => {
     if (details.level === "error" && !/ERR_|favicon|Content Security Policy|Widevine/i.test(details.message)) {
       failures.push(details.message);
     }
@@ -32,7 +32,12 @@ app.on("web-contents-created", (_event, contents) => {
   require("../src/main.cjs");
   await app.whenReady();
   const win = await waitFor(() => BrowserWindow.getAllWindows()[0], "main window");
-  const ui = code => win.webContents.executeJavaScript(code);
+  const ui = async code => {
+    try { return await win.webContents.executeJavaScript(code); }
+    catch (error) {
+      throw new Error(`${error.message}\nUI check: ${code.slice(0, 220)}\nConsole: ${failures.join("; ")}`, { cause: error });
+    }
+  };
   const click = async selector => {
     const point = await ui(`(() => {
       const node = document.querySelector(${JSON.stringify(selector)});
@@ -52,7 +57,15 @@ app.on("web-contents-created", (_event, contents) => {
   await fs.mkdir(output, { recursive: true });
   const capture = async name => {
     await pause(180); // Let the native compositor paint the selected section.
-    await fs.writeFile(path.join(output, name), (await win.webContents.capturePage()).toJPEG(88));
+    const image = await win.webContents.capturePage();
+    await fs.writeFile(path.join(output, name), image.toJPEG(88));
+    if (/appearance-(light|dark)|custom-claro|index-light/.test(name)) {
+      const bounds = await ui(`(() => {
+        const r=document.getElementById("side-panel").getBoundingClientRect();
+        return {x:Math.round(r.x),y:Math.round(r.y),width:Math.round(r.width),height:Math.round(r.height)};
+      })()`);
+      await fs.writeFile(path.join(output, name.replace(".jpg", "-panel.jpg")), image.crop(bounds).toJPEG(90));
+    }
   };
   assert.equal((await ui("window.brujula.getState()")).legal.accepted, false);
   assert.equal(await ui("document.getElementById('legal-accept').disabled"), true);
@@ -127,6 +140,61 @@ app.on("web-contents-created", (_event, contents) => {
   await click("[data-settings-index]");
   await click('[data-settings-category="appearance"]');
   assert.equal(await ui("document.getElementById('settings-content').scrollTop>=190"), true);
+  // Reproduce opposite theme/custom-color combinations from the Mac report.
+  // Read real paint, not just the preference values or inherited CSS tokens.
+  const { contrast } = require("../src/theme-tokens.cjs");
+  const originalAppearance = (await ui("window.brujula.getState()")).appearance;
+  for (const [theme, surfaceColor, canvasColor] of [
+    ["claro", "#2b2c30", "#202124"],
+    ["oscuro", "#fafafa", "#ffffff"],
+  ]) {
+    await ui(`window.brujula.setAppearance(${JSON.stringify({
+      theme, colorMode:"propio", surfaceColor, canvasColor, backdrop:"slate",
+      accent:"personalizado", customAccent: theme === "claro" ? "#00ffff" : "#ffff00",
+    })})`);
+    await waitFor(() => ui('!document.getElementById("appearance-color-notice").hidden'), "custom-color explanation");
+    await pause(200);
+    const samples = await ui(`(() => {
+      const context=document.createElement("canvas").getContext("2d");
+      const hex=value=>{
+        context.clearRect(0,0,1,1);context.fillStyle=value;context.fillRect(0,0,1,1);
+        return "#"+[...context.getImageData(0,0,1,1).data].slice(0,3).map(n=>n.toString(16).padStart(2,"0")).join("");
+      };
+      const samples=[];
+      for(const selector of ["#settings-search","#appearance-settings .segmented","#home-widget-background-toggle"]) {
+        const node=document.querySelector(selector);
+        const text=selector==="#settings-search"?node.querySelector("input"):
+          selector==="#appearance-settings .segmented"?node.querySelector('button[aria-pressed="false"]'):node;
+        samples.push({selector,bg:hex(getComputedStyle(node).backgroundColor),ink:hex(getComputedStyle(text).color)});
+      }
+      const panel=document.getElementById("side-panel");
+      return {samples,scheme:getComputedStyle(panel).colorScheme,
+        width:panel.getBoundingClientRect().width,mode:document.documentElement.dataset.colorMode};
+    })()`);
+    assert.equal(samples.mode, "propio");
+    assert.equal(samples.scheme, theme === "claro" ? "dark" : "light");
+    assert.ok(samples.width < 560, "menu is narrower than the previous 650px reservation");
+    for (const sample of samples.samples) assert.ok(contrast(sample.bg,sample.ink)>=4.5, JSON.stringify(sample));
+    await ui('document.getElementById("settings-content").scrollTop=0');
+    await capture(`slate-menu-custom-${theme}.jpg`);
+    if(theme==="claro") {
+      const saved = (await ui("window.brujula.getState()")).appearance;
+      await ui('document.querySelector("#appearance-color-notice [data-color-mode=tema]").click()');
+      await waitFor(() => ui('document.documentElement.dataset.colorMode==="tema"'), "follow-theme action");
+      assert.equal(await ui('document.getElementById("appearance-color-notice").hidden'), true);
+      const restored = (await ui("window.brujula.getState()")).appearance;
+      for(const key of ["surfaceColor","canvasColor","customAccent"]) assert.equal(restored[key],saved[key]);
+      await capture("slate-menu-follow-theme-light.jpg");
+    }
+    if(theme==="oscuro") {
+      await ui('window.brujula.setAppearance({contrast:"alto"})');
+      await waitFor(() => ui('document.documentElement.dataset.contrast==="alto"'), "high contrast with opposite custom surface");
+      assert.equal(await ui('document.getElementById("appearance-color-notice").hidden'), true);
+      assert.equal(await ui('getComputedStyle(document.getElementById("side-panel")).backgroundColor'), "rgb(0, 0, 0)");
+      await ui('window.brujula.setAppearance({contrast:"normal"})');
+    }
+  }
+  await ui(`window.brujula.setAppearance(${JSON.stringify(originalAppearance)})`);
   // Every catalog entry must reach its real destination without changing a preference.
   const beforeSearch = await ui("(async()=>{const s=await window.brujula.getState();return {appearance:s.appearance,browserPreferences:s.browserPreferences}})()");
   for (const entry of menuCatalog.entries) {
@@ -168,6 +236,8 @@ app.on("web-contents-created", (_event, contents) => {
   await ui(`(()=>{const input=document.getElementById("settings-search-input");input.value="actualizaciones";input.dispatchEvent(new Event("input",{bubbles:true}));})()`);
   await capture("slate-menu-search-dark.jpg");
   await ui("document.getElementById('settings-search-clear').click();window.SlateSettings.select('appearance')");
+  await ui('document.getElementById("settings-content").scrollTop=0');
+  await capture("slate-menu-appearance-dark.jpg");
   await ui("window.brujula.setAppearance({contrast:'alto'})");
   await waitFor(() => ui('document.documentElement.dataset.contrast==="alto"'), "high contrast menu");
   assert.equal(await ui('getComputedStyle(document.getElementById("side-panel")).backgroundColor'), "rgb(0, 0, 0)");
@@ -175,10 +245,10 @@ app.on("web-contents-created", (_event, contents) => {
   win.setContentSize(800, 650);
   await waitFor(() => ui("innerWidth<=850"), "narrow vertical menu");
   await ui("window.SlateSettings.showIndex()");
-  assert.equal(await ui(`(async()=>{
+  await waitFor(() => ui(`(async()=>{
     const s=await window.brujula.getState(),r=document.getElementById("side-panel").getBoundingClientRect();
     return s.layout.bounds.width>=260 && r.left>=s.layout.bounds.x+s.layout.bounds.width-1 && r.right<=innerWidth;
-  })()`), true);
+  })()`), "native bounds and panel agree after resize");
   await capture("slate-menu-narrow.jpg");
   await click('[data-settings-category="appearance"]');
   await click('[data-settings-section="home"]');

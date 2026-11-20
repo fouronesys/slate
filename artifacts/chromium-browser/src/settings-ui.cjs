@@ -38,29 +38,10 @@
     index.id = "settings-index";
     index.className = "settings-index";
     index.setAttribute("aria-label", "Índice de categorías");
-    const intro = document.createElement("div");
-    intro.className = "settings-index-card";
-    const introMark = document.createElement("span");
-    introMark.className = "settings-index-rule";
-    const introTitle = document.createElement("h3");
-    introTitle.textContent = "Un mapa más corto.";
-    const introCopy = document.createElement("p");
-    introCopy.textContent = "Cinco categorías reúnen los 13 destinos actuales sin ocultar dónde encontrar cada uno.";
-    const indexList = document.createElement("ol");
-    for (const item of [
-      "Categorías antes que listas largas. Cada fila nombra su contenido con ejemplos.",
-      "Búsqueda local, siempre disponible. Encuentra un ajuste sin salir de esta ventana.",
-      "Protección y Descargas siguen accesibles en la barra superior.",
-    ]) {
-      const row = document.createElement("li");
-      row.textContent = item;
-      indexList.append(row);
-    }
-    const indexNote = document.createElement("p");
-    indexNote.className = "settings-index-note";
-    indexNote.textContent = "La fila activa se puede distinguir por fondo, texto e icono; el chevón indica que se puede entrar.";
-    intro.append(introMark, introTitle, introCopy, indexList, indexNote);
-    index.append(intro);
+    const indexPrompt = document.createElement("p");
+    indexPrompt.className = "settings-index-prompt";
+    indexPrompt.textContent = "Elige una categoría";
+    index.append(indexPrompt);
     content.append(index);
     const search = byId("settings-search");
     panel.insertBefore(workspace, search.nextSibling);
@@ -132,13 +113,32 @@
         const icon = document.createElement("span");
         icon.className = "settings-category-mark";
         icon.setAttribute("aria-hidden", "true");
-        icon.textContent = `0${categories.indexOf(category) + 1}`;
+        const iconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        iconSvg.setAttribute("viewBox", "0 0 20 20");
+        iconSvg.setAttribute("focusable", "false");
+        const iconPaths = {
+          navigation: "M3 5.5h14M3 10h9M3 14.5h6",
+          appearance: "M10 2.5v3M10 14.5v3M2.5 10h3M14.5 10h3M4.7 4.7l2.1 2.1m6.4 6.4 2.1 2.1m0-10.6-2.1 2.1m-6.4 6.4-2.1 2.1M13.5 10a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z",
+          privacy: "M10 2.5 16 5v4.2c0 3.7-2.5 6.3-6 8.3-3.5-2-6-4.6-6-8.3V5l6-2.5Z",
+          library: "M4 3.5h12v13H4zM7 7h6M7 10h6M7 13h3",
+          information: "M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14Zm0-9v5m0-7h.01",
+        };
+        const iconPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        iconPath.setAttribute("d", iconPaths[category.id] || iconPaths.navigation);
+        iconSvg.append(iconPath);
+        icon.append(iconSvg);
         const copy = document.createElement("span");
         copy.className = "settings-category-copy";
         const title = document.createElement("strong");
         title.textContent = category.label;
         const detail = document.createElement("small");
-        detail.textContent = category.description;
+        detail.textContent = ({
+          navigation: "General · vídeos",
+          appearance: "Tema · inicio",
+          privacy: "Protección · permisos",
+          library: "Marcadores · actividad",
+          information: "Comandos · legal",
+        })[category.id] || category.description;
         const arrow = document.createElement("span");
         arrow.className = "settings-category-arrow";
         arrow.setAttribute("aria-hidden", "true");
@@ -155,7 +155,7 @@
     back.type = "button";
     back.className = "settings-back";
     back.dataset.settingsIndex = "true";
-    back.innerHTML = '<span aria-hidden="true">←</span><span>Todas las categorías</span>';
+    back.innerHTML = '<span aria-hidden="true">←</span><span>Categorías</span>';
     back.addEventListener("click", () => {
       showIndex();
       nav.querySelector(`[data-settings-category="${category.id}"]`)?.focus({ preventScroll: true });
@@ -177,10 +177,6 @@
       items.append(button);
     }
     nav.append(items);
-    const note = document.createElement("p");
-    note.className = "settings-nav-note";
-    note.textContent = "Al volver, conservas la ubicación y encuentras el resto de categorías.";
-    nav.append(note);
   }
 
   function openCategory(categoryId) {

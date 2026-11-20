@@ -5,7 +5,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { DEFAULT_APPEARANCE, COLOR_KEYS, normalizeAppearance, updateAppearance, resolveTheme } = require("../src/appearance.cjs");
 const { FeatureStore, DEFAULT_HOME, homePatch } = require("../src/features.cjs");
-const { palette, contrast } = require("../src/theme-tokens.cjs");
+const { palette, contrast, readableAccent } = require("../src/theme-tokens.cjs");
 
 test("new profiles follow the OS theme while saved explicit choices are respected", () => {
   assert.equal(DEFAULT_APPEARANCE.theme, "sistema");
@@ -35,6 +35,23 @@ test("custom palette generates legible text on both light and dark arbitrary col
     assert.ok(contrast(hex, colors.quiet) >= 4.5, `quiet contrast on ${hex}`);
   }
   assert.throws(() => palette("blue"));
+});
+
+test("surface control backgrounds and accents remain legible independently of the wallpaper or theme", () => {
+  for (const background of ["#000000", "#ffffff", "#2b2c30", "#ebe5da", "#757575", "#777777", "#ff0000", "#00ff00", "#0000ff"]) {
+    const colors = palette(background);
+    for (const ink of [colors.ink, colors.muted, colors.quiet]) {
+      assert.ok(contrast(colors.control, ink) >= 4.5, `${ink} on ${colors.control}`);
+    }
+    assert.ok(["dark", "light"].includes(colors.scheme));
+    for (const requested of ["#ffffff", "#000000", "#63795e", "#00ffff", "#ff00ff", "#ffff00"]) {
+      const accent = readableAccent(background, requested);
+      assert.ok(contrast(background, accent) >= 4.5);
+      assert.ok(contrast(colors.control, accent) >= 4.5);
+    }
+  }
+  assert.equal(readableAccent("#ffffff", "#000000"), "#000000");
+  assert.throws(() => readableAccent("#ffffff", "untrusted"));
 });
 
 test("free widget positions and background settings persist, undo and reset without losing collections", (t) => {

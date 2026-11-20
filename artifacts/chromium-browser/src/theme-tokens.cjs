@@ -27,12 +27,28 @@
   function palette(hex) {
     const background = hex.toLowerCase();
     const ink = contrast(background, "#ffffff") >= contrast(background, "#000000") ? "#ffffff" : "#000000";
+    // A visible inset on ordinary surfaces; move away from the foreground
+    // instead whenever a middle-gray custom color has little contrast to spare.
+    let control = mix(background, ink, 0.045);
+    if (contrast(control, ink) < 4.5) {
+      control = mix(background, ink === "#ffffff" ? "#000000" : "#ffffff", 0.08);
+    }
     let muted = ink;
     for (let amount = 0.6; amount <= 1.001; amount += 0.05) {
       const candidate = mix(background, ink, Math.min(1, amount));
-      if (contrast(background, candidate) >= 4.5) { muted = candidate; break; }
+      if (contrast(background, candidate) >= 4.5 && contrast(control, candidate) >= 4.5) { muted = candidate; break; }
     }
-    return { background, ink, muted, quiet: muted, line: mix(background, ink, 0.3) };
+    return { background, ink, muted, quiet: muted, line: mix(background, ink, 0.3),
+      control, scheme: ink === "#ffffff" ? "dark" : "light" };
   }
-  return { palette, contrast, luminance };
+  function readableAccent(background, requested) {
+    if (!valid(background) || !valid(requested)) throw new Error("Color no válido");
+    const { ink, control } = palette(background);
+    for (let step = 0; step <= 100; step++) {
+      const candidate = mix(requested, ink, step / 100);
+      if (contrast(background, candidate) >= 4.5 && contrast(control, candidate) >= 4.5) return candidate;
+    }
+    return ink;
+  }
+  return { palette, contrast, luminance, readableAccent };
 });

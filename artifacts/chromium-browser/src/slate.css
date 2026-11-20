@@ -53,10 +53,10 @@ body { margin: 0; overflow: hidden; color: var(--ink); background: var(--canvas)
   --line: var(--user-toolbar-line, var(--base-line));
 }
 :root:not([data-contrast="alto"]) .address-form {
-  --ink: var(--user-surface-ink, var(--base-ink));
-  --muted: var(--user-surface-muted, var(--base-muted));
-  --quiet: var(--user-surface-quiet, var(--base-quiet));
-  --line: var(--user-surface-line, var(--base-line));
+  --ink: var(--user-toolbar-ink, var(--base-ink));
+  --muted: var(--user-toolbar-muted, var(--base-muted));
+  --quiet: var(--user-toolbar-quiet, var(--base-quiet));
+  --line: var(--user-toolbar-line, var(--base-line));
 }
 [hidden] { display: none !important; }
 button, input { font: inherit; color: inherit; }
@@ -149,7 +149,27 @@ input::placeholder { color: var(--quiet); }
 :root[data-backdrop="lienzo"] .home-screen { background: repeating-linear-gradient(0deg, transparent, transparent 3px, var(--accent-wash) 4px), var(--canvas); }
 .home-content { width: min(618px, calc(100% - 54px)); margin: auto; }
 :root[data-contrast="alto"] .home-screen { background: var(--canvas); }
-:root:not([data-contrast="alto"]) .side-panel { --surface: var(--user-surface-bg, var(--base-surface)); --ink: var(--user-surface-ink, var(--base-ink)); --muted: var(--user-surface-muted, var(--base-muted)); --quiet: var(--user-surface-quiet, var(--base-quiet)); --line: var(--user-surface-line, var(--base-line)); }
+:root:not([data-contrast="alto"]) .side-panel {
+  --surface: var(--user-surface-bg, var(--base-surface));
+  --canvas: var(--user-surface-control, var(--base-canvas));
+  --ink: var(--user-surface-ink, var(--base-ink));
+  --muted: var(--user-surface-muted, var(--base-muted));
+  --quiet: var(--user-surface-quiet, var(--base-quiet));
+  --line: var(--user-surface-line, var(--base-line));
+  --accent: var(--user-surface-accent);
+  --accent-wash: var(--user-surface-wash);
+  color-scheme: var(--user-surface-scheme);
+}
+:root:not([data-contrast="alto"]) .experience-homebar {
+  --canvas: var(--user-canvas-control, var(--base-canvas));
+  --ink: var(--user-canvas-ink, var(--base-ink));
+  --muted: var(--user-canvas-ink, var(--base-ink));
+  --line: var(--user-canvas-line, var(--base-line));
+  --accent: var(--user-canvas-accent);
+  --accent-wash: var(--user-canvas-wash);
+}
+:root:not([data-contrast="alto"]) .experience-homebar button { background: var(--canvas); }
+:root:not([data-contrast="alto"]) .experience-homebar button[aria-pressed="true"] { background: var(--accent-wash); }
 .home-symbol { position: relative; display: grid; place-items: center; width: 66px; height: 66px; margin: 0 auto 21px; border: 1px solid var(--line); border-radius: 50%; }
 .home-symbol span { position: absolute; inset: 9px; border: 1px solid var(--line); border-radius: 50%; }
 .home-symbol img { width: 30px; height: 30px; }

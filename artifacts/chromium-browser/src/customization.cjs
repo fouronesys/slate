@@ -86,6 +86,29 @@ function renderAppearance(nextState) {
       }
     }
   }
+  // Fields and buttons belong to their own surface, not to the wallpaper's
+  // canvas. Custom colors stay saved; these are derived rendering tokens only.
+  const computed = getComputedStyle(root);
+  const requestedAccent = computed.getPropertyValue("--accent").trim();
+  for (const [zone, base] of [["surface", "--base-surface"], ["canvas", "--base-canvas"], ["toolbar", "--base-canvas"]]) {
+    if (root.dataset.contrast === "alto") {
+      for (const part of ["control", "scheme", "wash", "accent"]) root.style.removeProperty(`--user-${zone}-${part}`);
+      continue;
+    }
+    const background = root.style.getPropertyValue(`--user-${zone}-bg`).trim() ||
+      computed.getPropertyValue(base).trim();
+    const derived = window.SlateTheme.palette(background);
+    const tokens = {
+      control: derived.control, scheme: derived.scheme, wash: derived.control,
+      accent: window.SlateTheme.readableAccent(background, requestedAccent),
+    };
+    for (const [part, value] of Object.entries(tokens)) {
+      const key = `--user-${zone}-${part}`;
+      root.style.setProperty(key, value);
+    }
+  }
+  const colorNotice = document.getElementById("appearance-color-notice");
+  if (colorNotice) colorNotice.hidden = preferences.colorMode !== "propio" || root.dataset.contrast === "alto";
   for (const button of document.querySelectorAll("[data-color-mode]")) {
     button.setAttribute("aria-pressed", String((preferences.colorMode || "tema") === button.dataset.colorMode));
   }
