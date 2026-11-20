@@ -137,6 +137,11 @@ function renderToolbar() {
 
 function renderPanel() {
   if (window.SlateSettings) {
+    window.SlateSettings.render(state);
+    if (panelMode === "settings-index") {
+      window.SlateSettings.showIndex?.();
+      return;
+    }
     const section = ({
       bookmarks: "bookmarks",
       history: "history",
@@ -145,7 +150,6 @@ function renderPanel() {
       appearance: "appearance",
       features: "collections",
     })[panelMode] || panelMode || "general";
-    window.SlateSettings.render(state);
     window.SlateSettings.select(section);
     return;
   }
@@ -506,7 +510,7 @@ document.getElementById("clear-history").addEventListener("click", () => {
 document.getElementById("settings-toggle").addEventListener("click", () => {
   const isOpen = !sidePanel.hidden;
   if (isOpen) closePanel();
-  else openPanel("general");
+  else openPanel("settings-index");
 });
 
 address.addEventListener("focus", () => address.select());

@@ -5,21 +5,20 @@
   const docs = window.SlateLegalDocuments || {};
   const panel = document.getElementById("side-panel");
   const nav = document.getElementById("settings-nav");
-  const menuItems = [
-    { group: "NAVEGADOR", items: [["general", "General"], ["videos", "Vídeos"], ["appearance", "Apariencia"], ["privacy", "Protección"]] },
-    { group: "BIBLIOTECA", items: [["bookmarks", "Marcadores"], ["history", "Historial"], ["downloads", "Descargas"]] },
-    { group: "TU ESPACIO", items: [["collections", "Colecciones"], ["workspaces", "Espacios"], ["feature-privacy", "Permisos del sitio"], ["home", "Inicio y widgets"]] },
-    { group: "INFORMACIÓN", items: [["commands", "Comandos"], ["legal", "Documentos legales"]] },
-  ];
-  const labels = Object.fromEntries(menuItems.flatMap(group => group.items));
+  const navigation = window.SlateSettingsNavigation;
+  const categories = navigation.categories;
+  const labels = navigation.sectionLabels;
   let active = "general";
   let latestState = {};
   let built = false;
+  let indexVisible = false;
+  let searchResults = [];
   let gateWasOpen = false;
   let gateSaving = false;
   let documentSelection = "terms";
   let renderedSection = "";
   const scrollOffsets = new Map();
+  const lastSections = new Map();
   const byId = id => document.getElementById(id);
 
   function showToast(message) {
@@ -29,25 +28,53 @@
   function createNavigation() {
     if (built) return;
     built = true;
-    for (const group of menuItems) {
-      const section = document.createElement("section");
-      section.className = "settings-nav-group";
-      const heading = document.createElement("p");
-      heading.className = "settings-nav-label";
-      heading.textContent = group.group;
-      const items = document.createElement("div");
-      items.className = "settings-nav-items";
-      for (const [key, label] of group.items) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = label;
-        button.dataset.settingsSection = key;
-        button.addEventListener("click", () => select(key));
-        items.append(button);
-      }
-      section.append(heading, items);
-      nav.append(section);
+    const workspace = document.createElement("div");
+    workspace.id = "settings-workspace";
+    workspace.className = "settings-workspace";
+    const content = document.createElement("div");
+    content.id = "settings-content";
+    content.className = "settings-content";
+    const index = document.createElement("section");
+    index.id = "settings-index";
+    index.className = "settings-index";
+    index.setAttribute("aria-label", "Índice de categorías");
+    const intro = document.createElement("div");
+    intro.className = "settings-index-card";
+    const introMark = document.createElement("span");
+    introMark.className = "settings-index-rule";
+    const introTitle = document.createElement("h3");
+    introTitle.textContent = "Un mapa más corto.";
+    const introCopy = document.createElement("p");
+    introCopy.textContent = "Cinco categorías reúnen los 13 destinos actuales sin ocultar dónde encontrar cada uno.";
+    const indexList = document.createElement("ol");
+    for (const item of [
+      "Categorías antes que listas largas. Cada fila nombra su contenido con ejemplos.",
+      "Búsqueda local, siempre disponible. Encuentra un ajuste sin salir de esta ventana.",
+      "Protección y Descargas siguen accesibles en la barra superior.",
+    ]) {
+      const row = document.createElement("li");
+      row.textContent = item;
+      indexList.append(row);
     }
+    const indexNote = document.createElement("p");
+    indexNote.className = "settings-index-note";
+    indexNote.textContent = "La fila activa se puede distinguir por fondo, texto e icono; el chevón indica que se puede entrar.";
+    intro.append(introMark, introTitle, introCopy, indexList, indexNote);
+    index.append(intro);
+    content.append(index);
+    const search = byId("settings-search");
+    panel.insertBefore(workspace, search.nextSibling);
+    workspace.append(nav, content);
+    for (const child of [...panel.children]) {
+      if (child === workspace || child === search || child.classList.contains("panel-heading")) continue;
+      content.append(child);
+    }
+    byId("settings-index").hidden = true;
+    renderNavigation();
+    byId("settings-search-input").addEventListener("input", renderSearchResults);
+    byId("settings-search-input").addEventListener("keydown", onSearchKeydown);
+    byId("settings-search-clear").addEventListener("click", () => clearSearch(true));
+    byId("settings-search-results").addEventListener("keydown", onResultKeydown);
     for (const button of document.querySelectorAll("[data-legal-document]")) {
       button.addEventListener("click", () => showLegalDocument(button.dataset.legalDocument));
     }
@@ -80,15 +107,228 @@
     }, true);
   }
 
+  function renderNavigation() {
+    if (!built) return;
+    const category = navigation.categoryForSection(active);
+    const view = indexVisible ? "index" : category?.id;
+    if (nav.dataset.view === view) {
+      for (const button of nav.querySelectorAll("[data-settings-section]")) {
+        if (button.dataset.settingsSection === active) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      }
+      return;
+    }
+    nav.dataset.view = view;
+    nav.replaceChildren();
+    if (indexVisible) {
+      for (const category of categories) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "settings-category";
+        button.dataset.settingsCategory = category.id;
+        if (lastSections.get(category.id) === active) {
+          button.setAttribute("aria-current", "location");
+        }
+        const icon = document.createElement("span");
+        icon.className = "settings-category-mark";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = `0${categories.indexOf(category) + 1}`;
+        const copy = document.createElement("span");
+        copy.className = "settings-category-copy";
+        const title = document.createElement("strong");
+        title.textContent = category.label;
+        const detail = document.createElement("small");
+        detail.textContent = category.description;
+        const arrow = document.createElement("span");
+        arrow.className = "settings-category-arrow";
+        arrow.setAttribute("aria-hidden", "true");
+        arrow.textContent = "›";
+        copy.append(title, detail);
+        button.append(icon, copy, arrow);
+        button.addEventListener("click", () => openCategory(category.id));
+        nav.append(button);
+      }
+      return;
+    }
+    if (!category) return;
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "settings-back";
+    back.dataset.settingsIndex = "true";
+    back.innerHTML = '<span aria-hidden="true">←</span><span>Todas las categorías</span>';
+    back.addEventListener("click", () => {
+      showIndex();
+      nav.querySelector(`[data-settings-category="${category.id}"]`)?.focus({ preventScroll: true });
+    });
+    nav.append(back);
+    const heading = document.createElement("p");
+    heading.className = "settings-nav-label";
+    heading.textContent = category.label;
+    nav.append(heading);
+    const items = document.createElement("div");
+    items.className = "settings-nav-items";
+    for (const section of category.sections) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = labels[section];
+      button.dataset.settingsSection = section;
+      if (section === active) button.setAttribute("aria-current", "page");
+      button.addEventListener("click", () => select(section));
+      items.append(button);
+    }
+    nav.append(items);
+    const note = document.createElement("p");
+    note.className = "settings-nav-note";
+    note.textContent = "Al volver, conservas la ubicación y encuentras el resto de categorías.";
+    nav.append(note);
+  }
+
+  function openCategory(categoryId) {
+    const category = categories.find(item => item.id === categoryId);
+    if (category) {
+      select(lastSections.get(category.id) || category.sections[0]);
+      nav.querySelector('[aria-current="page"]')?.focus({ preventScroll: true });
+    }
+  }
+
+  function showIndex() {
+    if (!indexVisible) {
+      scrollOffsets.set(active, byId("settings-content").scrollTop);
+      renderedSection = "";
+      clearSearch(false);
+    }
+    indexVisible = true;
+    renderNavigation();
+    window.setPanelMode?.("settings-index");
+    renderIndex();
+  }
+
+  function renderIndex() {
+    indexVisible = true;
+    if (!built) return;
+    byId("settings-workspace").classList.add("is-index");
+    byId("settings-index").hidden = false;
+    byId("settings-content").classList.remove("is-section");
+    for (const id of ["general-settings", "video-settings", "commands-settings", "legal-settings", "appearance-settings", "privacy-settings", "panel-items", "clear-history", "experience-settings"]) {
+      const node = byId(id);
+      if (node) node.hidden = true;
+    }
+    byId("panel-title").textContent = "Ajustes";
+    byId("panel-kicker").textContent = "SLATE PRIVACY · AJUSTES";
+    byId("customize-toggle").setAttribute("aria-expanded", "false");
+  }
+
+  function renderSearchResults() {
+    const input = byId("settings-search-input");
+    const results = byId("settings-search-results");
+    const clear = byId("settings-search-clear");
+    const query = input.value.trim();
+    clear.hidden = !query;
+    results.replaceChildren();
+    searchResults = navigation.search(query);
+    if (!query) {
+      results.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+      byId("settings-search-status").textContent = "";
+      return;
+    }
+    results.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    if (!searchResults.length) {
+      const empty = document.createElement("p");
+      empty.className = "settings-search-empty";
+      empty.textContent = "No se encontraron ajustes. Prueba con otra palabra.";
+      results.append(empty);
+      byId("settings-search-status").textContent = "No se encontraron ajustes.";
+      return;
+    }
+    searchResults.forEach((entry, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "settings-search-result";
+      button.setAttribute("role", "option");
+      button.setAttribute("aria-selected", "false");
+      button.dataset.resultIndex = String(index);
+      button.addEventListener("focus", () => {
+        for (const option of results.querySelectorAll('[role="option"]')) {
+          option.setAttribute("aria-selected", String(option === button));
+        }
+      });
+      const title = document.createElement("strong");
+      title.textContent = entry.label;
+      const meta = document.createElement("small");
+      meta.textContent = `${navigation.categoryForSection(entry.section).label} · ${labels[entry.section]}`;
+      button.append(title, meta);
+      button.addEventListener("click", () => openSearchResult(entry));
+      results.append(button);
+    });
+    byId("settings-search-status").textContent = `${searchResults.length} ${searchResults.length === 1 ? "resultado" : "resultados"}.`;
+  }
+
+  function openSearchResult(entry) {
+    select(entry.section);
+    clearSearch(false);
+    requestAnimationFrame(() => {
+      let target;
+      try { target = document.querySelector(entry.target); } catch {}
+      if (!target || !target.getClientRects().length || target.matches(":disabled")) {
+        target = byId("settings-content").querySelector(":scope > :not([hidden])");
+      }
+      if (!target) return;
+      target.scrollIntoView?.({ block: "center", behavior: "auto" });
+      if (!target.matches("input,select,textarea,button,[tabindex]")) target.setAttribute("tabindex", "-1");
+      target.focus?.({ preventScroll: true });
+    });
+  }
+
+  function clearSearch(focusInput) {
+    const input = byId("settings-search-input");
+    input.value = "";
+    renderSearchResults();
+    if (focusInput) input.focus();
+  }
+
+  function onSearchKeydown(event) {
+    if (event.key === "ArrowDown" && !byId("settings-search-results").hidden) {
+      const first = byId("settings-search-results").querySelector("button");
+      if (first) { event.preventDefault(); first.focus(); }
+    } else if (event.key === "Enter" && searchResults.length) {
+      event.preventDefault();
+      openSearchResult(searchResults[0]);
+    } else if (event.key === "Escape" && byId("settings-search-input").value) {
+      event.preventDefault();
+      event.stopPropagation();
+      clearSearch(false);
+    }
+  }
+
+  function onResultKeydown(event) {
+    const buttons = [...byId("settings-search-results").querySelectorAll("button")];
+    const index = buttons.indexOf(document.activeElement);
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (event.key === "ArrowUp" && index === 0) {
+        byId("settings-search-input").focus();
+        return;
+      }
+      const next = event.key === "ArrowDown" ? Math.min(buttons.length - 1, index + 1) : Math.max(0, index - 1);
+      buttons[next]?.focus();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      clearSearch(false);
+      byId("settings-search-input").focus();
+    }
+  }
+
   function select(section) {
     if (!labels[section]) return;
-    if (section !== active) scrollOffsets.set(active, panel.scrollTop);
+    if (!indexVisible && section !== active) scrollOffsets.set(active, byId("settings-content").scrollTop);
     active = section;
+    lastSections.set(navigation.categoryForSection(section).id, section);
+    indexVisible = false;
     window.setPanelMode?.(section);
-    for (const button of nav.querySelectorAll("[data-settings-section]")) {
-      if (button.dataset.settingsSection === active) button.setAttribute("aria-current", "page");
-      else button.removeAttribute("aria-current");
-    }
+    renderNavigation();
     renderSelection();
   }
 
@@ -100,10 +340,14 @@
 
   function renderSelection() {
     const sectionChanged = renderedSection !== active;
-    if (!sectionChanged) scrollOffsets.set(active, panel.scrollTop);
+    const content = byId("settings-content");
+    if (!sectionChanged) scrollOffsets.set(active, content.scrollTop);
     const features = byId("experience-settings");
     const mode = active;
     const items = byId("panel-items");
+    byId("settings-workspace").classList.remove("is-index");
+    byId("settings-index").hidden = true;
+    content.classList.add("is-section");
     byId("general-settings").hidden = mode !== "general";
     byId("video-settings").hidden = mode !== "videos";
     byId("commands-settings").hidden = mode !== "commands";
@@ -114,21 +358,32 @@
     byId("clear-history").hidden = mode !== "history";
     if (features) features.hidden = !["collections", "workspaces", "feature-privacy", "home"].includes(mode);
 
-    const title = labels[mode] || "Ajustes";
-    byId("panel-title").textContent = title;
-    byId("panel-kicker").textContent = "SLATE PRIVACY · AJUSTES";
     byId("customize-toggle").setAttribute("aria-expanded", String(mode === "appearance"));
     if (["bookmarks", "history"].includes(mode)) window.renderPanelItems?.(mode);
     if (mode === "downloads") window.SlateDownloads?.renderPanel(items, latestState.downloads);
     if (["collections", "workspaces", "feature-privacy", "home"].includes(mode)) {
       const feature = { collections: "colecciones", workspaces: "espacios", "feature-privacy": "privacidad", home: "inicio" }[mode];
       window.SlateFeatures?.renderPanel(feature);
+      const featureRoot = byId("experience-settings");
+      if (featureRoot && featureRoot.parentElement !== content) content.append(featureRoot);
     }
     if (mode === "commands") renderCommands(latestState.commands || []);
     if (mode === "legal") renderDocument(byId("legal-document"), documentSelection);
     if (["privacy", "videos"].includes(mode)) window.renderPrivacy?.();
-    panel.scrollTop = scrollOffsets.get(active) || 0;
+    syncLocation();
+    content.scrollTop = scrollOffsets.get(active) || 0;
     renderedSection = active;
+  }
+
+  function syncLocation() {
+    if (indexVisible) {
+      byId("panel-title").textContent = "Ajustes";
+      byId("panel-kicker").textContent = "SLATE PRIVACY · AJUSTES";
+      return;
+    }
+    const category = navigation.categoryForSection(active);
+    byId("panel-title").textContent = labels[active] || "Ajustes";
+    byId("panel-kicker").textContent = `ESTÁS EN · ${category?.label || "AJUSTES"}`;
   }
 
   function setMenuState(nextState) {
@@ -142,11 +397,14 @@
     const engine = byId("search-engine");
     if (document.activeElement !== background) background.checked = Boolean(prefs.backgroundTabs);
     if (document.activeElement !== pip) pip.checked = prefs.pipButton !== false;
-    byId("online-suggestions").checked = prefs.onlineSuggestions === true;
+    if (document.activeElement !== byId("online-suggestions")) byId("online-suggestions").checked = prefs.onlineSuggestions === true;
     if (document.activeElement !== engine) engine.value = latestState.features?.settings?.searchEngine || "google";
-    if (!nav.childElementCount) createNavigation();
+    if (!built) createNavigation();
     renderCommands(latestState.commands || []);
-    if (!panel.hidden) renderSelection();
+    if (!panel.hidden) {
+      if (indexVisible) renderIndex();
+      else renderSelection();
+    }
     updateGate(latestState.legal);
   }
 
@@ -357,9 +615,14 @@
   window.SlateSettings = {
     render: setMenuState,
     open(section = "general") {
-      select(labels[section] ? section : "general");
+      if (section === "settings-index" || section === "index") showIndex();
+      else select(labels[section] ? section : "general");
     },
     select,
+    showIndex,
+    openCategory,
+    syncLocation,
+    search: query => navigation.search(query),
     showLegalDocument,
   };
 })();

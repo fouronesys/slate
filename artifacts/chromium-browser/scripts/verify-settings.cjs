@@ -33,6 +33,21 @@ app.on("web-contents-created", (_event, contents) => {
   await app.whenReady();
   const win = await waitFor(() => BrowserWindow.getAllWindows()[0], "main window");
   const ui = code => win.webContents.executeJavaScript(code);
+  const click = async selector => {
+    const point = await ui(`(() => {
+      const node = document.querySelector(${JSON.stringify(selector)});
+      if (!node) throw Error("Control ausente");
+      node.scrollIntoView({block:"nearest"});
+      const r = node.getBoundingClientRect();
+      const x = r.x + r.width / 2, y = r.y + r.height / 2;
+      if (!r.width || !r.height || !node.contains(document.elementFromPoint(x,y)))
+        throw Error("Control oculto o cubierto: " + ${JSON.stringify(selector)});
+      return {x:Math.round(x), y:Math.round(y)};
+    })()`);
+    win.webContents.sendInputEvent({type:"mouseDown",button:"left",clickCount:1,...point});
+    win.webContents.sendInputEvent({type:"mouseUp",button:"left",clickCount:1,...point});
+    await pause(40);
+  };
   await waitFor(() => ui("Boolean(window.brujula && window.SlateSettings && document.documentElement.dataset.uiReady)"), "UI ready");
   await fs.mkdir(output, { recursive: true });
   const capture = async name => {
@@ -83,16 +98,101 @@ app.on("web-contents-created", (_event, contents) => {
   assert.equal(await ui("document.querySelector('.home-content h1') === null"), true);
   assert.equal((await ui("window.brujula.getState()")).appearance.headingFont, "system");
   await ui("document.getElementById('settings-toggle').click()");
-  for (const section of ["general", "videos", "appearance", "privacy", "bookmarks", "history", "downloads", "collections", "workspaces", "feature-privacy", "home", "commands", "legal"]) {
-    await ui(`document.querySelector('[data-settings-section="${section}"]').click()`);
-    assert.equal(await ui("document.getElementById('side-panel').hidden"), false);
-    assert.equal(await ui("document.querySelector('[data-settings-section][aria-current]').dataset.settingsSection"), section);
+  win.setContentSize(1320, 860);
+  await waitFor(() => ui("document.querySelectorAll('[data-settings-category]').length===5"), "five-category index");
+  await capture("slate-menu-index-light.jpg");
+  const menuCatalog = require("../src/settings-navigation.cjs");
+  for (const category of menuCatalog.categories) {
+    await click(`[data-settings-category="${category.id}"]`);
+    for (const section of category.sections) {
+      await click(`[data-settings-section="${section}"]`);
+      assert.equal(await ui("document.getElementById('side-panel').hidden"), false);
+      assert.equal(await ui("document.querySelector('[data-settings-section][aria-current]').dataset.settingsSection"), section);
+    }
+    await click("[data-settings-index]");
+    assert.equal(await ui("document.querySelectorAll('[data-settings-category]').length"), 5);
   }
+  await ui("window.SlateSettings.select('appearance')");
+  await capture("slate-menu-appearance-light.jpg");
+  // Same-section refreshes must preserve navigation focus, controls and scroll.
+  assert.equal(await ui(`(async()=>{
+    const nav=document.querySelector('[data-settings-section="appearance"]');
+    const input=document.getElementById("default-zoom");
+    const content=document.getElementById("settings-content");
+    nav.focus(); content.scrollTop=200;
+    window.SlateSettings.render(await window.brujula.getState());
+    window.SlateSettings.select("appearance");
+    return document.activeElement===nav && input===document.getElementById("default-zoom") && content.scrollTop>=190;
+  })()`), true);
+  await click("[data-settings-index]");
+  await click('[data-settings-category="appearance"]');
+  assert.equal(await ui("document.getElementById('settings-content').scrollTop>=190"), true);
+  // Every catalog entry must reach its real destination without changing a preference.
+  const beforeSearch = await ui("(async()=>{const s=await window.brujula.getState();return {appearance:s.appearance,browserPreferences:s.browserPreferences}})()");
+  for (const entry of menuCatalog.entries) {
+    await ui(`(() => {
+      const input=document.getElementById("settings-search-input");
+      input.value=${JSON.stringify(entry.label)};
+      input.dispatchEvent(new Event("input",{bubbles:true}));
+      const button=[...document.querySelectorAll(".settings-search-result")].find(node=>node.querySelector("strong").textContent===${JSON.stringify(entry.label)});
+      if(!button) throw Error("Resultado ausente");
+      button.click();
+    })()`);
+    await waitFor(() => ui(`(() => {
+      const target=document.querySelector(${JSON.stringify(entry.target)});
+      if(!target) throw Error("Destino inexistente");
+      const expected=target.getClientRects().length && !target.matches(":disabled") ? target
+        : document.getElementById("settings-content").querySelector(":scope > :not([hidden])");
+      return document.querySelector('[data-settings-section][aria-current]')?.dataset.settingsSection===${JSON.stringify(entry.section)}
+        && document.activeElement===expected;
+    })()`), `search ${entry.label}`);
+  }
+  assert.deepEqual(await ui("(async()=>{const s=await window.brujula.getState();return {appearance:s.appearance,browserPreferences:s.browserPreferences}})()"), beforeSearch);
+  await ui(`(()=>{const input=document.getElementById("settings-search-input");input.focus();input.value="PiP";input.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+  win.webContents.focus();
+  for (const keyCode of ["ArrowDown", "Enter"]) {
+    win.webContents.sendInputEvent({type:"keyDown",keyCode});
+    win.webContents.sendInputEvent({type:"keyUp",keyCode});
+  }
+  await waitFor(() => ui('document.activeElement?.id==="pip-button-enabled"'), "keyboard search result");
+  await ui(`(()=>{const input=document.getElementById("settings-search-input");input.focus();input.value="no-existe-este-ajuste";input.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+  assert.equal(await ui('document.querySelectorAll(".settings-search-result").length'), 0);
+  win.webContents.sendInputEvent({type:"keyDown",keyCode:"Escape"});
+  win.webContents.sendInputEvent({type:"keyUp",keyCode:"Escape"});
+  assert.equal(await ui('document.getElementById("side-panel").hidden'), false);
+  assert.equal(await ui('document.getElementById("settings-search-input").value'), "");
+  await ui("window.brujula.setAppearance({theme:'oscuro'})");
+  await waitFor(() => ui('document.documentElement.dataset.theme==="oscuro"'), "dark menu");
+  await ui("window.SlateSettings.showIndex()");
+  await capture("slate-menu-index-dark.jpg");
+  await ui(`(()=>{const input=document.getElementById("settings-search-input");input.value="actualizaciones";input.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+  await capture("slate-menu-search-dark.jpg");
+  await ui("document.getElementById('settings-search-clear').click();window.SlateSettings.select('appearance')");
+  await ui("window.brujula.setAppearance({contrast:'alto'})");
+  await waitFor(() => ui('document.documentElement.dataset.contrast==="alto"'), "high contrast menu");
+  assert.equal(await ui('getComputedStyle(document.getElementById("side-panel")).backgroundColor'), "rgb(0, 0, 0)");
+  await ui("window.brujula.setAppearance({theme:'claro',contrast:'normal',tabStyle:'vertical'})");
+  win.setContentSize(800, 650);
+  await waitFor(() => ui("innerWidth<=850"), "narrow vertical menu");
+  await ui("window.SlateSettings.showIndex()");
+  assert.equal(await ui(`(async()=>{
+    const s=await window.brujula.getState(),r=document.getElementById("side-panel").getBoundingClientRect();
+    return s.layout.bounds.width>=260 && r.left>=s.layout.bounds.x+s.layout.bounds.width-1 && r.right<=innerWidth;
+  })()`), true);
+  await capture("slate-menu-narrow.jpg");
+  await click('[data-settings-category="appearance"]');
+  await click('[data-settings-section="home"]');
+  await click("[data-settings-index]");
+  await click('[data-settings-category="appearance"]');
+  assert.equal(await ui("document.querySelector('[data-settings-section][aria-current]').dataset.settingsSection"), "home");
+  await ui("window.brujula.setAppearance({tabStyle:'superior'})");
+  win.setContentSize(1320, 860);
+  await ui("window.SlateSettings.select('legal')");
   await ui("document.querySelector('[data-legal-document=\"privacy\"]').click()");
   assert.match(await ui("document.getElementById('legal-document').textContent"), /Widevine/);
   await ui("window.SlateSettings.select('history');window.SlateSettings.select('downloads');window.SlateSettings.select('history')");
   assert.equal(await ui("document.getElementById('panel-items').querySelector('.downloads-center')===null"), true);
-  await ui("document.querySelector('[data-settings-section=\"commands\"]').click()");
+  await ui("window.SlateSettings.select('commands')");
   assert.equal(await ui("document.querySelectorAll('.browser-command').length"), 11);
   await pause(200);
   assert.equal(await ui("document.getElementById('panel-title').textContent"), "Comandos");
@@ -100,14 +200,17 @@ app.on("web-contents-created", (_event, contents) => {
   await capture("slate-configuracion-comandos.jpg");
   await ui("window.brujula.setBrowserPreferences({defaultZoom:125,pipButton:false,backgroundTabs:true})");
   const prefs = JSON.parse(await fs.readFile(path.join(profile, "browser-preferences.json"), "utf8"));
-  assert.deepEqual(prefs, { defaultZoom: 125, pipButton: false, backgroundTabs: true });
+  assert.deepEqual(prefs, {
+    defaultZoom: 125, pipButton: false, backgroundTabs: true,
+    onlineSuggestions: false, automaticUpdates: false,
+  });
   await new Promise(resolve => { win.webContents.once("did-finish-load", resolve); win.webContents.reload(); });
   await waitFor(() => ui("document.documentElement.dataset.uiReady && document.getElementById('legal-gate').hidden"), "legal acceptance after reload");
   assert.equal((await ui("window.brujula.getState()")).browserPreferences.defaultZoom, 125);
   await ui("window.brujula.setBrowserPreferences({defaultZoom:100,pipButton:true})");
   if (process.argv.includes("--ui-only")) {
     assert.deepEqual(failures, []);
-    console.log("SLATE UI OK: first run, declarations, persistence, system font, sections, legal documents and history/download transitions.");
+    console.log("SLATE UI OK: category index/back, all 13 destinations, all search targets, keyboard/escape, unchanged preferences, focus/scroll preservation, both themes, high contrast, narrow vertical layout, quick accesses, legal acceptance and persistence.");
     app.quit();
     return;
   }

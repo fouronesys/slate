@@ -130,6 +130,13 @@
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg>
         </button>
       </div>
+      <div class="settings-search" id="settings-search">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+        <input id="settings-search-input" type="search" role="combobox" aria-autocomplete="list" autocomplete="off" placeholder="Buscar en ajustes…" aria-label="Buscar en ajustes" aria-controls="settings-search-results" aria-expanded="false" />
+        <button id="settings-search-clear" type="button" aria-label="Limpiar búsqueda" title="Limpiar búsqueda" hidden>Limpiar</button>
+        <div id="settings-search-results" class="settings-search-results" role="listbox" aria-label="Resultados de ajustes" hidden></div>
+        <p id="settings-search-status" class="settings-search-status" role="status" aria-live="polite"></p>
+      </div>
       <nav class="settings-nav" id="settings-nav" aria-label="Ajustes y biblioteca"></nav>
       <section id="general-settings" class="general-settings settings-section" hidden aria-label="General">
         <p class="panel-intro">Ajustes de navegación guardados localmente en este dispositivo.</p>
@@ -365,6 +372,7 @@
     <script src="./contrast-colors.cjs"></script>
     <script src="./home-contrast.cjs"></script>
     <script src="./downloads-ui.cjs"></script>
+    <script src="./settings-navigation.cjs"></script>
     <script src="./settings-ui.cjs"></script>
     <script src="./updates-ui.cjs"></script>
     <script src="./address-suggestions.cjs"></script>
