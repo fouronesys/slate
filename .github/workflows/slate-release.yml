@@ -57,6 +57,8 @@ jobs:
         run: pnpm --filter @workspace/chromium-browser run backgrounds:fetch
       - run: pnpm --filter @workspace/chromium-browser run typecheck
       - run: pnpm --filter @workspace/chromium-browser test
+      - name: Comprobar arranque sin metadatos de desarrollo
+        run: pnpm --filter @workspace/chromium-browser exec electron scripts/verify-packaged-startup.cjs
       - run: pnpm --filter @workspace/chromium-browser run package:mac:check
       - name: Preparar cliente VMP oficial
         run: pnpm --filter @workspace/chromium-browser run video:setup

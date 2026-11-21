@@ -39,11 +39,12 @@ async function promote(opts) {
   const app = await fs.realpath(opts["--app"]), dmg = await fs.realpath(opts["--dmg"]);
   if (path.basename(app) !== "Slate Privacy.app") throw new Error("Indica el navegador, no el asistente.");
   const packaged = JSON.parse(bundleFile(app, "package.json"));
+  const runtime = JSON.parse(bundleFile(app, "src/runtime-metadata.json"));
   const packagedPolicy = JSON.parse(bundleFile(app, "src/mac-updates/policy.json"));
   assertPolicy(packagedPolicy);
   const configured = JSON.parse(await fs.readFile(path.join(root, "package.json"), "utf8"));
-  if (packaged.build?.electronVersion !== configured.build.electronVersion ||
-      packaged.build?.mac?.minimumSystemVersion !== "12.0") throw new Error("No se promoverá un cambio de motor ni de compatibilidad macOS.");
+  if (runtime.electronVersion !== configured.build.electronVersion ||
+      runtime.minimumSystemVersion !== "12.0") throw new Error("No se promoverá un cambio de motor ni de compatibilidad macOS.");
   const report = JSON.parse(await fs.readFile(opts["--acceptance"], "utf8"));
   const dmgSha256 = await hashFile(dmg);
   acceptance(report, packaged.version, arch, dmgSha256);
@@ -57,7 +58,7 @@ async function promote(opts) {
   const record = {
     schema: 1, repository: REPOSITORY, channel: "stable", bundleId: "com.brujula.browser",
     version: info.version, build: info.build, teamId: info.teamId, arch,
-    minMacOS: "12.0", engine: packaged.build.electronVersion,
+    minMacOS: runtime.minimumSystemVersion, engine: runtime.electronVersion,
     asset: expectedName, size: (await fs.stat(dmg)).size, sha256: dmgSha256,
     bundleSha256: await treeHash(app), frameworkSha256: await hashFile(path.join(app, FRAMEWORK)),
     vmpCheckedAt: now, vmpValidUntil: now + 29 * 86400000,

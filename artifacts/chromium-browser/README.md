@@ -1,5 +1,21 @@
 # Menú unificado, PiP visible y primer inicio
 
+## Versión 0.1.8 — corrección del arranque tras actualizar
+
+- El navegador ya no intenta leer `package.json.build`, que electron-builder
+  elimina del paquete instalado.
+- La identidad completa del motor ECS se conserva en un recurso de ejecución
+  y se comprueba contra la configuración de compilación, también en la
+  promoción de actualizaciones.
+- La preparación de entregas verifica los metadatos dentro de `app.asar`
+  y comprueba el arranque de Electron sin configuración de desarrollo.
+
+Comprobado localmente con 236 pruebas, incluida una comprobación del ASAR,
+y arranque nativo con metadatos de producción. La instalación y actualización
+reales del DMG firmado siguen requiriendo comprobación en un Mac.
+Si la versión anterior no abre, reemplazar solamente la aplicación con el DMG
+corregido; no borrar el perfil ni sus datos.
+
 ## Versión 0.1.7 — carga de favicons
 
 - Reintento automático ante fallos temporales, sin dar por cargado un icono fallido.

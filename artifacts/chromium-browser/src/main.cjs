@@ -127,7 +127,8 @@ let browserPreferences = normalizePreferences({});
 let legalRecord = {};
 let maintenanceQuit = false;
 const macUpdater = new MacUpdater({
-  app, dialog, getWindow: () => windowRef, engine: require("../package.json").build.electronVersion,
+  // electron-builder removes package.json.build from installed applications.
+  app, dialog, getWindow: () => windowRef, engine: require("./runtime-metadata.json").electronVersion,
   prepareQuit: async () => {
     // Stop page writes before flushing Chromium storage. The external helper
     // waits for this entire process to exit before copying a single profile byte.
