@@ -5,7 +5,7 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "../../..");
 const destination = path.join(root, "generated-artifacts", "slate-github");
 const browser = "artifacts/chromium-browser";
-const extensions = new Set([".cjs", ".js", ".css", ".html", ".svg", ".png", ".plist", ".json", ".md", ".sh", ".yml", ".yaml", ".ttf", ".woff", ".woff2", ".txt"]);
+const extensions = new Set([".cjs", ".js", ".css", ".html", ".svg", ".png", ".plist", ".nsh", ".json", ".md", ".sh", ".yml", ".yaml", ".ttf", ".woff", ".woff2", ".txt"]);
 function main() {
   if (fs.existsSync(destination)) throw new Error("La exportación ya existe. Usa un destino limpio.");
   function copy(relative) {

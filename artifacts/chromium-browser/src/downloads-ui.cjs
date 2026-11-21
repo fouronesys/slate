@@ -71,7 +71,7 @@
       if (row.dataset.controlsKey === controlsKey) continue;
       row.dataset.controlsKey = controlsKey;
       controls.replaceChildren();
-      if (entry.state === "completed") controls.append(action(state.platform === "darwin" ? "Mostrar en Finder" : "Mostrar en carpeta", entry.id, "show"));
+      if (entry.state === "completed") controls.append(action(state.platform === "darwin" ? "Mostrar en Finder" : state.platform === "win32" ? "Mostrar en el Explorador" : "Mostrar en carpeta", entry.id, "show"));
       if (entry.active && entry.state === "progressing" && !entry.paused) controls.append(action("Pausar", entry.id, "pause"));
       if (entry.resumable && (entry.paused || entry.state === "interrupted")) controls.append(action(entry.paused ? "Continuar" : "Reintentar", entry.id, "resume"));
       if (entry.active) controls.append(action("Cancelar", entry.id, "cancel"));

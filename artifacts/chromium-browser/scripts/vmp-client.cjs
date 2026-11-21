@@ -34,7 +34,8 @@ function bundlePath(input) {
   return app;
 }
 
-function createClient({ execute = spawnSync, python = "python3", clientDir = CLIENT_DIR } = {}) {
+function createClient({ execute = spawnSync, python = process.platform === "win32" ? "python" : "python3",
+  clientDir = CLIENT_DIR, resolveBundle = bundlePath } = {}) {
   function run(module, args, interactive = false) {
     const offline = module === "vmp" && !args.includes("sign-pkg");
     return execute(python, ["-c", BOOTSTRAP, clientDir, `castlabs_evs.${module}`, offline ? "offline" : "online", ...args], {
@@ -63,7 +64,7 @@ function createClient({ execute = spawnSync, python = "python3", clientDir = CLI
     const text = `${result.stdout || ""}\n${result.stderr || ""}`;
     if (/valid for development only/i.test(text)) return "el certificado es solo de desarrollo, no de producción";
     if (/expires in less than/i.test(text)) return "la firma está caducada o tiene menos de 30 días de vigencia";
-    if (/not yet valid/i.test(text)) return "el certificado aún no es válido; comprueba también la fecha del Mac";
+    if (/not yet valid/i.test(text)) return "el certificado aún no es válido; comprueba también la fecha del equipo";
     if (/failed to read signature/i.test(text)) return "la firma no existe o no se puede leer";
     if (/failed to verify signature/i.test(text)) return "la firma no valida el binario actual";
     if (result.error || result.signal) return "la herramienta no pudo completar la comprobación";
@@ -84,7 +85,7 @@ function createClient({ execute = spawnSync, python = "python3", clientDir = CLI
       if (result.error || result.status !== 0) throw new Error("El cliente oficial no completó el acceso a la cuenta. No compartas contraseñas ni tokens en el chat.");
     },
     verify(input) {
-      const app = bundlePath(input);
+      const app = resolveBundle(input);
       ready();
       const result = operation("verify-pkg", app);
       if (!valid(result)) {
@@ -95,7 +96,7 @@ function createClient({ execute = spawnSync, python = "python3", clientDir = CLI
     },
     sign(input, { allowBinaryUpload = false } = {}) {
       if (!allowBinaryUpload) throw new Error("Subida bloqueada: firmar requiere --vmp-sign y --allow-binary-upload al compilar.");
-      const app = bundlePath(input);
+      const app = resolveBundle(input);
       ready();
       if (!valid(operation("verify-pkg", app))) {
         const result = operation("sign-pkg", app);

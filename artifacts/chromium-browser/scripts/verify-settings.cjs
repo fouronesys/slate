@@ -121,6 +121,12 @@ app.on("web-contents-created", (_event, contents) => {
       await click(`[data-settings-section="${section}"]`);
       assert.equal(await ui("document.getElementById('side-panel').hidden"), false);
       assert.equal(await ui("document.querySelector('[data-settings-section][aria-current]').dataset.settingsSection"), section);
+      assert.deepEqual(await ui(`(() => {
+        const panel=document.getElementById("side-panel"),content=document.getElementById("settings-content");
+        return {compact:panel.getBoundingClientRect().width<=360,
+          panelOverflow:panel.scrollWidth>panel.clientWidth+1,
+          contentOverflow:content.scrollWidth>content.clientWidth+1};
+      })()`), {compact:true,panelOverflow:false,contentOverflow:false}, section);
     }
     await click("[data-settings-index]");
     assert.equal(await ui("document.querySelectorAll('[data-settings-category]').length"), 5);
@@ -173,7 +179,7 @@ app.on("web-contents-created", (_event, contents) => {
     })()`);
     assert.equal(samples.mode, "propio");
     assert.equal(samples.scheme, theme === "claro" ? "dark" : "light");
-    assert.ok(samples.width < 560, "menu is narrower than the previous 650px reservation");
+    assert.ok(samples.width <= 360, "settings remain compact with custom colors");
     for (const sample of samples.samples) assert.ok(contrast(sample.bg,sample.ink)>=4.5, JSON.stringify(sample));
     await ui('document.getElementById("settings-content").scrollTop=0');
     await capture(`slate-menu-custom-${theme}.jpg`);
@@ -263,7 +269,7 @@ app.on("web-contents-created", (_event, contents) => {
   await ui("window.SlateSettings.select('history');window.SlateSettings.select('downloads');window.SlateSettings.select('history')");
   assert.equal(await ui("document.getElementById('panel-items').querySelector('.downloads-center')===null"), true);
   await ui("window.SlateSettings.select('commands')");
-  assert.equal(await ui("document.querySelectorAll('.browser-command').length"), 11);
+  assert.equal(await ui("document.querySelectorAll('#browser-commands .browser-command').length"), 11);
   await pause(200);
   assert.equal(await ui("document.getElementById('panel-title').textContent"), "Comandos");
   assert.match(await ui("getComputedStyle(document.getElementById('panel-title')).fontFamily"), /Segoe UI|sans-serif/);

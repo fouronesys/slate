@@ -44,6 +44,12 @@ let server;
   const ui=code=>win.webContents.executeJavaScript(code);
   const state=()=>ui("window.brujula.getState()");
   await wait(()=>ui("document.documentElement.dataset.uiReady==='true'").catch(()=>false),"UI");
+  // Fresh disposable profiles must accept the same legal gate as a real user.
+  // Never bypass it in the product just to make a native test reach the filters.
+  await ui(`window.brujula.acceptLegal({
+    version:window.SlateLegalDocuments.version,terms:true,privacy:true,adult:true
+  })`);
+  await wait(()=>ui("document.getElementById('legal-gate').hidden"),"legal acceptance");
   await wait(async()=>(await state()).privacy.status==="ready","protection");
   await ui(`window.brujula.navigate(${JSON.stringify(origin+"/page")})`);
   await wait(async()=>(await state()).tabs[0].url===origin+"/page" && !(await state()).tabs[0].loading,"local page");

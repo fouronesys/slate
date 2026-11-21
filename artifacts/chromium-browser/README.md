@@ -1,5 +1,15 @@
 # Menú unificado, PiP visible y primer inicio
 
+## Panel de ajustes compacto
+
+El panel reserva como máximo 360 px de la ventana (antes 560), respetando el
+mínimo de espacio de navegación y las pestañas verticales. El índice conserva
+sus cinco categorías; dentro de una categoría, los accesos de sección se sitúan
+encima del contenido para no dividir el ancho disponible en dos columnas.
+La búsqueda local, la ubicación, el regreso a categorías, el foco y la posición
+de lectura por sección se conservan. Protección y Descargas siguen visibles
+en la barra superior.
+
 ## Menú de clic derecho
 
 El menú nativo cambia según el elemento:
@@ -96,7 +106,27 @@ ese paso en el producto.
 
 # Slate Privacy
 
-Slate Privacy (antes Brújula) es una app de escritorio basada en Chromium (Electron), diseñada para macOS. Incluye navegación web con pestañas, búsqueda, marcadores e historial local.
+Slate Privacy (antes Brújula) es una app de escritorio basada en Chromium (Electron), diseñada inicialmente para macOS, con preparación de una primera versión Windows x64. Incluye navegación web con pestañas, búsqueda, marcadores e historial local.
+
+## Windows x64
+
+La [guía Windows](docs/WINDOWS.md) contiene requisitos (Windows 10 o posterior),
+compilación NSIS separada de Mac, adaptación nativa, conservación de datos,
+firma Authenticode, VMP opcional específica de Windows y matriz de pruebas.
+`pnpm --filter @workspace/chromium-browser run package:windows:check` valida
+la configuración sin compilar ni firmar. La compilación real requiere Windows
+x64. **No se ha generado ni validado un instalador Windows en este entorno Linux**;
+las pruebas de reproducción Mac no acreditan reproducción Windows y una firma
+válida no elimina automáticamente las advertencias de SmartScreen.
+
+## Plan para Android, iPhone e iPad
+
+La [propuesta de arquitectura móvil](docs/arquitectura-movil.md) compara Chromium
+mantenido y GeckoView en Android, propone WebKit para distribución general en
+iPhone/iPad y detalla límites, matriz de funciones, costes orientativos y pruebas
+en dispositivos. Es planificación pendiente de aprobación del motor y del alcance:
+no hay apps móviles implementadas ni se promete paridad de escritorio o DRM/PiP
+sin pruebas. El plan no modifica este navegador.
 
 ## Descargas y Miso mensajero
 
@@ -138,7 +168,7 @@ Los permisos nuevos se limitan a contenido protegido del origen principal HTTPS,
 
 #### Empaquetado y límite de distribución
 
-Ambos empaquetadores usan la distribución ECS fijada, no una descarga accidental de Electron estándar. Se mantienen DMG separados para Apple Silicon e Intel. Para cargar la biblioteca Widevine firmada por otro proveedor, la configuración de firma macOS incluye la excepción de validación de bibliotecas requerida por ECS; **no desactiva el sandbox de Chromium ni la seguridad web**, pero sí es un cambio explícito en las condiciones de carga de bibliotecas de la app.
+Los dos empaquetadores Mac usan la distribución ECS fijada, no una descarga accidental de Electron estándar. Se mantienen DMG separados para Apple Silicon e Intel. Para cargar la biblioteca Widevine firmada por otro proveedor, la configuración de firma macOS incluye la excepción de validación de bibliotecas requerida por ECS; **no desactiva el sandbox de Chromium ni la seguridad web**, pero sí es un cambio explícito en las condiciones de carga de bibliotecas de la app.
 
 Las versiones ECS se suministran con firma VMP de desarrollo. **Un servicio comercial puede rechazar una aplicación sin la firma VMP de producción adecuada aunque reconozca Widevine.** La firma VMP debe preceder a la firma de código de Apple en macOS. La firma/notarización Apple y VMP son cosas distintas. No se copian CDM de Chrome ni se falsifican certificados. Por defecto no se solicita ninguna firma remota.
 

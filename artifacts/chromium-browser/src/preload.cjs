@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("brujula", {
+  macUpdates: () => ipcRenderer.invoke("browser:mac-updates"),
   appUpdateAction: (action) => ipcRenderer.invoke("browser:app-update", action),
   setBrowserPreferences: (patch) => ipcRenderer.invoke("browser:set-browser-preferences", patch),
   runCommand: (id) => ipcRenderer.invoke("browser:run-command", id),

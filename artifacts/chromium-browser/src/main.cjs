@@ -23,6 +23,7 @@ const { clearFavicon, updateFavicon } = require("./tab-favicon.cjs");
 const { buildContextMenu } = require("./context-menu.cjs");
 const { ProtectedVideo, allowProtectedMedia, probeProtectedVideo } = require("./protected-video.cjs");
 const path = require("node:path");
+const { windowFrame, desktopTitle } = require("./desktop-platform.cjs");
 const fs = require("node:fs");
 const { randomUUID } = require("node:crypto");
 const { NativeCompanion } = require("./native-companion.cjs");
@@ -67,6 +68,7 @@ const { commandsFor } = require("./browser-commands.cjs");
 const { FeatureStore, searchLibrary } = require("./features.cjs");
 const { ExpiringPermissions } = require("./permissions.cjs");
 const { ElectronBlocker } = require("@ghostery/adblocker-electron");
+const { MacUpdater } = require("./mac-updates/controller.cjs");
 
 configureNativePrivacy(app.commandLine);
 
@@ -79,6 +81,10 @@ const hasSavedProfile = ["appearance.json", "bookmarks.json", "privacy.json", "h
 if (app.isPackaged && !hasSavedProfile && fs.existsSync(legacyProfile)) profilePath = legacyProfile;
 app.setName("Slate Privacy");
 app.setPath("userData", profilePath);
+if (process.platform === "win32") app.setAppUserModelId("com.brujula.browser");
+// A second process must not open SQLite/cookies while the updater snapshots it.
+const ownsMacInstance = process.platform !== "darwin" || process.mas || !app.isPackaged || app.requestSingleInstanceLock();
+if (!ownsMacInstance) app.quit();
 
 let windowRef;
 let lastTabQuitPending = false;
@@ -118,6 +124,21 @@ const contexts = new Map();
 let quittingAfterCleanup = false;
 let browserPreferences = normalizePreferences({});
 let legalRecord = {};
+let maintenanceQuit = false;
+const macUpdater = new MacUpdater({
+  app, dialog, getWindow: () => windowRef, engine: require("../package.json").build.electronVersion,
+  prepareQuit: async () => {
+    // Stop page writes before flushing Chromium storage. The external helper
+    // waits for this entire process to exit before copying a single profile byte.
+    for (const tab of tabs) if (!tab.view.webContents.isDestroyed()) tab.view.webContents.close();
+    const sessions = new Set([session.defaultSession, ...[...contexts.values()].map(context => context.session)]);
+    for (const browserSession of sessions) {
+      browserSession.flushStorageData();
+      await browserSession.cookies.flushStore();
+    }
+    maintenanceQuit = true;
+  },
+});
 let appUpdates;
 
 function scheduleAppUpdates() {
@@ -459,6 +480,7 @@ function snapshot(incremental = false) {
     backgroundVideos,
     backgroundVideoFile,
     platform: process.platform,
+    macUpdatesAvailable: macUpdater.supported,
     browserPreferences,
     appUpdates: appUpdates?.snapshot(),
     commands: commandsFor(process.platform),
@@ -492,6 +514,8 @@ function flushState() {
   stateFrame = null;
   if (!windowRef || windowRef.isDestroyed()) return;
   companionOverlay?.sync();
+  const title = desktopTitle(process.platform, activeTab());
+  if (windowRef.getTitle() !== title) windowRef.setTitle(title);
   windowRef.webContents.send("browser:state", snapshot(true));
 }
 
@@ -987,12 +1011,7 @@ function createWindow() {
     title: "Slate Privacy",
     icon: path.join(__dirname, "assets/icon.png"),
     backgroundColor: useNativeMaterial() ? "#00000000" : nativeBackground(),
-    ...(process.platform === "darwin" ? {
-      vibrancy: useNativeMaterial() ? "under-window" : undefined,
-      visualEffectState: "followWindow",
-    } : {}),
-    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
-    trafficLightPosition: { x: 16, y: 17 },
+    ...windowFrame(process.platform, useNativeMaterial()),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -1002,6 +1021,7 @@ function createWindow() {
     },
   });
   windowRef.setMenuBarVisibility(false);
+  if (process.platform === "win32") windowRef.setMenu(null);
   companionOverlay = new NativeCompanion(windowRef, {
     onOutsideClick: () => setImmediate(dismissSidePanel),
     getState: () => ({
@@ -1152,7 +1172,12 @@ function addIpcHandlers() {
     return contents.executeJavaScript(`(${probeProtectedVideo.toString()})()`);
   });
   handle("browser:download-action", (_event, id, action) => downloads.action(featureStore.data.workspaceId, id, action));
-  handle("browser:ui-ready", () => { windowRef.show(); return true; });
+  handle("browser:mac-updates", () => macUpdater.open());
+  handle("browser:ui-ready", () => {
+    windowRef.show();
+    void macUpdater.confirmStartup().catch(error => dialog.showErrorBox("Actualización sin confirmar", error.message));
+    return true;
+  });
   handle("browser:feature-action", (_event, action) => {
     if (action?.type === "settings:update" && action.patch?.searchEngine) searchSuggestions.cancel();
     return featureAction(action);
@@ -1347,7 +1372,8 @@ function addIpcHandlers() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  if (!ownsMacInstance || !await macUpdater.bootstrap()) return;
   legalRecord = readJson("legal-acceptance.json", {});
   browserPreferences = normalizePreferences(readJson("browser-preferences.json", {}));
   appUpdates = new AppUpdates({
@@ -1444,7 +1470,7 @@ app.on("before-quit", (event) => {
   // Cancel pending list downloads as well as update timers at shutdown.
   for (const context of contexts.values()) context.protection.dispose();
   for (const tab of tabs) if (tab.ephemeral) tab.protection.dispose();
-  if (!featureStore?.data.settings.clearOnExit || quittingAfterCleanup === true) return;
+  if (maintenanceQuit || !featureStore?.data.settings.clearOnExit || quittingAfterCleanup === true) return;
   event.preventDefault();
   if (quittingAfterCleanup === false) {
     quittingAfterCleanup = "cleaning";

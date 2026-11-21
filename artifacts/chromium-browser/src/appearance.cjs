@@ -78,7 +78,7 @@ function getLayout(preferences, panelOpen, width, height, hasBookmarks = false, 
   const titlebarHeight = preferences.autoHideTitlebar && !titlebarRevealed ? 6 : 43;
   const chromeHeight = titlebarHeight + tabsHeight + toolbarHeight + bookmarksBarHeight;
   const sidebarWidth = vertical ? Math.min(width < 1100 ? 176 : 208, Math.max(0, width - 260)) : 0;
-  const panelWidth = panelOpen ? Math.min(560, Math.max(0, width - sidebarWidth - 260)) : 0;
+  const panelWidth = panelOpen ? Math.min(360, Math.max(0, width - sidebarWidth - 260)) : 0;
   return {
     chromeHeight, titlebarHeight, tabsHeight, toolbarHeight, bookmarksBarHeight, sidebarWidth, panelWidth,
     bounds: {

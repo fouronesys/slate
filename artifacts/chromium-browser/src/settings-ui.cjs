@@ -63,6 +63,14 @@
     byId("background-tabs").addEventListener("change", event => saveBrowserPreferences({ backgroundTabs: event.target.checked }));
     byId("pip-button-enabled").addEventListener("change", event => saveBrowserPreferences({ pipButton: event.target.checked }));
     byId("search-engine").addEventListener("change", event => saveSearchEngine(event.target.value));
+    byId("mac-updates").addEventListener("click", async event => {
+      const button = event.currentTarget;
+      const label = button.textContent;
+      button.disabled = true;
+      button.textContent = "Preparando actualización…";
+      try { await bridge.macUpdates(); } catch (error) { showToast(error.message); }
+      finally { button.disabled = false; button.textContent = label; }
+    });
     byId("online-suggestions").addEventListener("change", event => saveBrowserPreferences({ onlineSuggestions: event.target.checked }));
     byId("legal-accept").addEventListener("click", acceptLegal);
     byId("legal-decline").addEventListener("click", quit);
@@ -155,6 +163,7 @@
     back.type = "button";
     back.className = "settings-back";
     back.dataset.settingsIndex = "true";
+    back.setAttribute("aria-label", "Volver a categorías de ajustes");
     back.innerHTML = '<span aria-hidden="true">←</span><span>Categorías</span>';
     back.addEventListener("click", () => {
       showIndex();
@@ -384,6 +393,7 @@
 
   function setMenuState(nextState) {
     latestState = nextState || latestState;
+    byId("mac-updates-section").hidden = latestState.macUpdatesAvailable !== true;
     window.SlateUpdates?.render(latestState);
     const prefs = latestState.browserPreferences || { pipButton: true, defaultZoom: 100, backgroundTabs: false };
     const zoom = byId("default-zoom");

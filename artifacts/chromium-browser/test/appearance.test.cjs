@@ -54,6 +54,19 @@ test("bookmark bar adds native content clearance only when bookmarks are visible
   assert.equal(visible.bounds.y - hidden.bounds.y, 31);
 });
 
+test("compact settings reserve at most 360px without stealing the minimum browsing area", () => {
+  for (const width of [760, 800, 1320, 1920]) {
+    for (const tabStyle of ["superior", "vertical"]) {
+      const layout = getLayout({ ...DEFAULT_APPEARANCE, tabStyle }, true, width, 860);
+      assert.ok(layout.panelWidth <= 360);
+      assert.ok(layout.bounds.width >= 260);
+      assert.equal(layout.sidebarWidth + layout.bounds.width + layout.panelWidth, width);
+    }
+  }
+  assert.equal(getLayout(DEFAULT_APPEARANCE, true, 1320, 860).panelWidth, 360);
+  assert.equal(getLayout(DEFAULT_APPEARANCE, false, 1320, 860).panelWidth, 0);
+});
+
 test("automatic titlebar saves only its preference and preserves tabs, panels and native content geometry", () => {
   assert.equal(normalizeAppearance({}).autoHideTitlebar, false);
   assert.equal(updateAppearance(DEFAULT_APPEARANCE, { autoHideTitlebar: true }).autoHideTitlebar, true);

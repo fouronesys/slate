@@ -124,3 +124,13 @@ por aprobadas estas filas. Una captura de Linux no acredita ninguna de ellas.
 - Castlabs, [EVS y orden de firmas](https://github.com/castlabs/electron-releases/wiki/EVS).
 
 Viabilidad y lista independiente de tienda: [MAC-APP-STORE.md](MAC-APP-STORE.md).
+
+## Actualizaciones de la distribución directa
+
+Flujo nuevo, configuración de confianza, promoción sin publicación y matriz de
+recuperación del perfil: [MAC-UPDATES.md](MAC-UPDATES.md). Proveedor elegido:
+GitHub Releases `fouronesys/slate`, solo estable. Los dos comandos de empaquetado
+siguen usando `--publish never`; crear un DMG no lo autoriza como actualización.
+El actualizador consume únicamente el DMG tradicional final verificado, no el
+asistente. La primera instalación del actualizador y su clave pública requiere
+una entrega manual. No hay clave de producción configurada ni prueba Mac realizada.

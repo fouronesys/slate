@@ -2,14 +2,19 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 function safeName(name) {
-  return path.basename(String(name || "archivo").replace(/\\/g, "/"))
-    .replace(/[<>:"|?*\x00-\x1f]/g, "_").slice(0, 180).replace(/^\.+$/, "archivo") || "archivo";
+  let clean = path.basename(String(name || "archivo").replace(/\\/g, "/"))
+    .replace(/[<>:"|?*\x00-\x1f\x7f]/g, "_").slice(0, 180).replace(/[. ]+$/, "") || "archivo";
+  // Win32 device names are reserved even with an extension, in any case.
+  if (/^(con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)/i.test(clean)) clean = `_${clean}`;
+  return clean;
 }
-function unusedPath(directory, name, reserved = new Set()) {
+function unusedPath(directory, name, reserved = new Set(), platform = process.platform) {
   const parsed = path.parse(safeName(name));
+  const key = value => platform === "win32" ? value.toLowerCase() : value;
+  const occupied = new Set([...reserved].map(key));
   for (let i = 0; i < 10000; i++) {
     const candidate = path.join(directory, `${parsed.name}${i ? ` (${i})` : ""}${parsed.ext}`);
-    if (!reserved.has(candidate) && !fs.existsSync(candidate)) return candidate;
+    if (!occupied.has(key(candidate)) && !fs.existsSync(candidate)) return candidate;
   }
   throw new Error("No se encontró un nombre libre para la descarga.");
 }
