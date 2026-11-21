@@ -13,7 +13,8 @@ const { writeRecoveryEntry, NAME } = require("../src/mac-updates/recovery.cjs");
 const { save } = require("../src/mac-updates/transaction.cjs");
 const quote = value => `'${value.replaceAll("'", "'\\''")}'`;
 async function temporary(t) {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "slate-boundary-"));
+  // macOS TMPDIR may use /var while the native verifier requires /private/var.
+  const dir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "slate-boundary-")));
   t.after(() => fs.rm(dir, { recursive: true, force: true }));
   return dir;
 }

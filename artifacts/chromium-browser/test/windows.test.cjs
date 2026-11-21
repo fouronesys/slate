@@ -61,7 +61,8 @@ test("Windows download names handle devices, trailing dots and case-insensitive 
   assert.equal(unusedPath(dir, "foto.jpg", new Set([path.join(dir, "FOTO.JPG")]), "darwin"), path.join(dir, "foto.jpg"));
 });
 function fixture(t) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "slate-win-vmp-"));
+  // Keep the fixture canonical just like the client's packaged executable path.
+  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "slate-win-vmp-")));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const exe = path.join(dir, "Slate Privacy.exe");
   fs.mkdirSync(path.join(dir, "resources")); fs.writeFileSync(path.join(dir, "resources/app.asar"), "fixture");
