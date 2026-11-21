@@ -48,8 +48,9 @@ function renderTabs() {
     item.title = `${tab.ephemeral ? "Fugaz · " : ""}${tab.title || "Nueva pestaña"}${tab.url ? `\n${tab.url}` : ""}`;
 
     const favicon = document.createElement("span");
-    favicon.className = `tab-favicon ${tab.loading ? "loading" : ""}`;
-    if (!tab.loading) {
+    const waitingForIcon = tab.loading && !tab.favicon;
+    favicon.className = `tab-favicon ${waitingForIcon ? "loading" : ""}`;
+    if (!waitingForIcon) {
       const mark = document.createElement("img");
       mark.alt = "";
       mark.draggable = false;

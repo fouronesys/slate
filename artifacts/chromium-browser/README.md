@@ -1,5 +1,20 @@
 # Menú unificado, PiP visible y primer inicio
 
+## Versión 0.1.7 — carga de favicons
+
+- Reintento automático ante fallos temporales, sin dar por cargado un icono fallido.
+- Redirecciones verificadas en el transporte nativo, con límite de saltos y sin
+  enviar cookies, credenciales ni referente.
+- Consulta del favicon convencional del sitio cuando no declara uno y detección
+  de imágenes binarias servidas sin un tipo de imagen correcto.
+- Conservación del icono válido mientras se actualiza; el icono disponible no
+  queda oculto por el indicador de carga de la página.
+
+Comprobado con 233 pruebas de lógica y una prueba local en Electron para
+redirecciones, cambios de icono, pestañas independientes y visualización.
+No se utilizan servicios externos para buscar favicons. Esta preparación de
+fuentes no sustituye la compilación, firma ni prueba del instalador en Mac.
+
 ## Panel de ajustes compacto
 
 El panel reserva como máximo 360 px de la ventana (antes 560), respetando el

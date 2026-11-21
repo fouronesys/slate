@@ -31,13 +31,18 @@ async function waitFor(check, label) {
   const blue = png([220, 115, 35, 255]);
   await session.defaultSession.protocol.handle("https", request => {
     const url = new URL(request.url);
+    if (url.pathname === "/redirect") return new Response(null, {
+      status: 302, headers: { location: "/blue.png" },
+    });
+    if (url.hostname === "implicit-icon.test" && url.pathname === "/favicon.ico")
+      return new Response(red, { headers: { "content-type": "application/octet-stream" } });
     if (url.pathname.endsWith(".png")) return new Response(
       url.pathname.includes("blue") ? blue : red,
       { headers: { "content-type": "image/png" } });
-    const missing = url.hostname === "no-icon.test";
+    const missing = ["no-icon.test", "implicit-icon.test"].includes(url.hostname);
     return new Response(`<!doctype html><meta charset="utf-8">
       <title>${missing ? "Sin favicon" : "Icono local"}</title>
-      ${missing ? "" : '<link id="icon" rel="icon" type="image/png" href="/red.png">'}
+      ${missing ? "" : `<link id="icon" rel="icon" type="image/png" href="${url.hostname === "redirect-icon.test" ? "/redirect" : "/red.png"}">`}
       <body style="font:20px system-ui;padding:40px;background:#202124;color:white">
       Página local de comprobación de favicons</body>`,
     { headers: { "content-type": "text/html" } });
@@ -58,6 +63,14 @@ async function waitFor(check, label) {
   await waitFor(() => ui("document.querySelectorAll('.site-favicon img').length===2 && [...document.querySelectorAll('.site-favicon img')].every(img=>img.complete && img.naturalWidth===16)"), "two independent site icons");
   await ui("window.brujula.runCommand('new-tab')");
   await waitFor(() => ui("document.querySelector('.tab.active .tab-favicon img')?.getAttribute('src') === './assets/slate.svg'"), "new tab logo");
+  await ui("window.brujula.navigate('https://redirect-icon.test')");
+  await waitFor(async () => (await ui("window.brujula.getState()")).tabs.at(-1).favicon ===
+    `data:image/png;base64,${blue.toString("base64")}`, "redirected icon");
+  await waitFor(() => ui("document.querySelector('.tab.active .site-favicon img')?.naturalWidth===16"), "decoded redirected icon");
+  await ui("window.brujula.navigate('https://implicit-icon.test')");
+  await waitFor(async () => (await ui("window.brujula.getState()")).tabs.at(-1).favicon ===
+    `data:image/png;base64,${red.toString("base64")}`, "conventional icon without a declared link");
+  await waitFor(() => ui("document.querySelector('.tab.active .site-favicon img')?.naturalWidth===16"), "decoded conventional icon");
   await ui("window.brujula.navigate('https://no-icon.test')");
   await waitFor(() => ui("document.querySelector('.tab.active .generic-favicon') !== null"), "missing icon fallback");
   await ui("document.documentElement.dataset.theme='oscuro'");
@@ -66,6 +79,6 @@ async function waitFor(check, label) {
   const output = path.resolve(__dirname, "../../../generated-artifacts/slate-favicons.jpg");
   await fs.mkdir(path.dirname(output), { recursive: true });
   await fs.writeFile(output, (await win.webContents.capturePage()).toJPEG(85));
-  console.log("SLATE FAVICONS OK: session fetch, native favicon event, live icon changes, independent tabs, home logo, missing icon fallback and unaltered dark-theme colors.");
+  console.log("SLATE FAVICONS OK: session fetch, native favicon event, live changes, independent tabs, safe redirects, conventional binary icons, decoded UI images, home logo, missing icon fallback and dark-theme colors.");
   app.quit();
 })().catch(error => { console.error(error); app.exit(1); });

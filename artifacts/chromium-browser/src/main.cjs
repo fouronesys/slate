@@ -1,4 +1,4 @@
-const { app, BrowserWindow, WebContentsView, ipcMain, session, dialog, Menu, nativeTheme, systemPreferences, clipboard, shell } = require("electron");
+const { app, BrowserWindow, WebContentsView, ipcMain, session, dialog, Menu, nativeTheme, systemPreferences, clipboard, shell, net } = require("electron");
 const { Downloads } = require("./downloads.cjs");
 const { historyEntry, reserveSpace } = require("./address-suggestions.cjs");
 const { SearchSuggestions } = require("./search-suggestions.cjs");
@@ -19,7 +19,8 @@ const searchSuggestions = new SearchSuggestions({
     return suggestionSession.fetch(url, options);
   },
 });
-const { clearFavicon, updateFavicon } = require("./tab-favicon.cjs");
+const { clearFavicon, updateFavicon, refreshFavicon } = require("./tab-favicon.cjs");
+const { createFaviconFetcher } = require("./favicon-request.cjs");
 const { buildContextMenu } = require("./context-menu.cjs");
 const { ProtectedVideo, allowProtectedMedia, probeProtectedVideo } = require("./protected-video.cjs");
 const path = require("node:path");
@@ -733,6 +734,7 @@ function createTab(initialUrl = null, activate = true, options = {}) {
   };
 
   const contents = view.webContents;
+  tab.fetchFavicon = createFaviconFetcher(options => net.request(options), browserSession);
   contents.setZoomFactor(browserPreferences.defaultZoom / 100);
   contents.on("enter-html-full-screen", () => {
     if (tab.id !== activeTabId) return;
@@ -800,7 +802,10 @@ function createTab(initialUrl = null, activate = true, options = {}) {
     }
   });
   contents.on("dom-ready", () => void applyPageTheme(tab));
-  contents.on("did-finish-load", () => contents.setZoomFactor(browserPreferences.defaultZoom / 100));
+  contents.on("did-finish-load", () => {
+    contents.setZoomFactor(browserPreferences.defaultZoom / 100);
+    void refreshFavicon(tab, sendState);
+  });
   contents.on("did-frame-finish-load", () => void syncVideoButtons(contents, browserPreferences.pipButton));
   contents.on("destroyed", () => {
     clearFavicon(tab);
